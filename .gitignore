@@ -1,0 +1,50 @@
+# --- Flutter / Dart (se agregan al crear la app en el Día 2) ---
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+coverage/
+
+# --- Entornos y secretos (NUNCA subir claves) ---
+.env
+.env.*
+*.env
+secrets/
+*.keystore
+!debug.keystore
+key.properties
+**/api_keys.dart
+.fvm/
+
+# --- IDE / editores ---
+.idea/
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+*.iml
+*.ipr
+*.iws
+
+# --- Android ---
+android/.gradle/
+android/local.properties
+android/app/release/
+android/key.properties
+
+# --- iOS ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs y temporales ---
+*.log
+*.tmp
+~$*
