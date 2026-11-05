@@ -1,12 +1,31 @@
-# app/ — Código Flutter de CiudadAlerta
+# app/ — Primera app Flutter de CiudadAlerta
 
-Esta carpeta contendrá el proyecto Flutter del Proyecto Guía.
+Carpeta creada en el **Día 2** con `flutter create` (equivalente). Es la app
+contador estándar: sirve para verificar la instalación del entorno (Flutter SDK
+con FVM, VS Code, Android Studio + emulador) y practicar el hot reload.
 
-**Se crea en el Día 2** con el comando:
+## Cómo ejecutarla
 
 ```bash
-fvm flutter create app --org <dominio de la organización> --project-name ciudadalerta
+cd app
+fvm flutter pub get          # descarga dependencias (versión fija del curso)
+fvm flutter run              # elige el emulador AVD o tu celular por USB
 ```
 
-Hasta entonces permanece vacía (con este README) para que Git la versione.
-Ver `.gitignore` en la raíz para las reglas de exclusión del proyecto Flutter.
+- **Hot reload**: guarda el archivo (`Ctrl+S`) → la pantalla se actualiza sin recompilar.
+- **Hot restart**: `Shift+R` en la terminal → reinicia el estado de la app.
+
+## Estructura
+
+```
+app/
+├── lib/main.dart            ← código de la app (pantalla contador, StatefulWidget)
+├── test/widget_test.dart    ← pruebas de widgets
+├── pubspec.yaml             ← dependencias y metadatos (versión 0.1.0+1)
+└── analysis_options.yaml    ← reglas de estilo (flutter_lints)
+```
+
+## Regla del curso
+
+El SDK está fijado con FVM: usa siempre `fvm flutter ...` en lugar de `flutter ...`
+para que todos los equipos trabajen con la misma versión congelada del semestre.
