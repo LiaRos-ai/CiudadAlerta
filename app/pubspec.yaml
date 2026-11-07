@@ -1,7 +1,7 @@
 name: ciudadalerta
-description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Primera pantalla (HU-01), tema ThemeData y widgets reutilizables (Clase 3)."
+description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Navegación con go_router (HU-02), lista de reportes (HU-03), detalle (HU-04) y formulario validado (HU-05). Clase 4."
 publish_to: 'none'
-version: 0.2.0+1
+version: 0.3.0+1
 
 environment:
   # Version congelada del curso (FVM). Ver docs/07-convenciones-git.md
@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  # Dia 4: navegación declarativa (rutas, parámetros y ShellRoute)
+  go_router: ^14.2.0
 
 dev_dependencies:
   flutter_test:

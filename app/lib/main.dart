@@ -1,22 +1,25 @@
 // CiudadAlerta - Proyecto Guia · Aplicaciones Moviles I (SIS-0180)
-// Clase 3 (Dia 3): Dart y Flutter - widgets, estado y estilos.
+// Clase 4 (Dia 4): Navegacion, listas y formularios.
 //
-// La app estrena su primera pantalla real (HU-01) y su tema propio:
-//   lib/theme/app_theme.dart      -> ThemeData con Material 3 (semilla #329B67)
-//   lib/widgets/custom_button.dart -> CustomButton (reutilizable)
-//   lib/widgets/custom_input.dart  -> CustomInput (reutilizable)
-//   lib/widgets/report_card.dart   -> ReportCard (primer StatelessWidget con datos)
-//   lib/screens/welcome_screen.dart-> WelcomeScreen (HU-01, solo UI, con setState)
+// La app deja de ser una pantalla suelta y se convierte en un FLUJO:
+//   lib/routing/app_router.dart        -> go_router: rutas, ShellRoute y /reporte/:id
+//   lib/data/report.dart               -> modelo Report (fromJson/toJson)
+//   lib/data/mock_reports.dart         -> datos simulados + cargarReportes() async
+//   lib/screens/home_shell.dart        -> HU-02: 4 pestañas con NavigationBar
+//   lib/screens/reports_list_screen.dart -> HU-03: ListView.builder + estados
+//   lib/screens/report_detail_screen.dart-> HU-04: detalle con parámetro de ruta
+//   lib/screens/new_report_screen.dart   -> HU-05: Form + TextFormField + validators
 //
 // Practica de la clase:
-//   1. Corre la app (fvm flutter run) y mira la pantalla de bienvenida.
-//   2. Toca "Mostrar/Ocultar contrasena": es el setState del dia.
-//   3. Rota el emulador (Ctrl+izquierda): HU-01 no debe romper el layout.
-//   4. Cambia el seedColor en app_theme.dart, guarda (Ctrl+S) y mira el hot reload.
+//   1. Corre la app (fvm flutter run), entra y prueba las 4 pestañas (HU-02).
+//   2. Toca un reporte de la lista: la ruta cambia a /reporte/RPT-00x (HU-04).
+//   3. Ve a Nuevo y envia el formulario vacio: valida sin enviar (HU-05).
+//   4. En el codigo: busca StatefulShellRoute y fíjate cómo el shell conserva
+//      el estado de cada pestaña.
 
 import 'package:flutter/material.dart';
+import 'routing/app_router.dart';
 import 'theme/app_theme.dart';
-import 'screens/welcome_screen.dart';
 
 void main() => runApp(const CiudadAlertaApp());
 
@@ -25,11 +28,11 @@ class CiudadAlertaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'CiudadAlerta',
       debugShowCheckedModeBanner: false,
       theme: temaCiudadAlerta(),      // tema propio del curso (Material 3)
-      home: const WelcomeScreen(),    // HU-01: bienvenida e inicio de sesion
+      routerConfig: appRouter,        // go_router: el mapa de rutas del Dia 4
     );
   }
 }
