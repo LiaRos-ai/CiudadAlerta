@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 1 · Día 4 — Avance de la Clase 4: Navegación, listas y formularios**
+**Sprint 1 · Día 5 — Cierre del Sprint 1: pruebas alfa, control de versiones y release v0.1**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -11,29 +11,28 @@ El docente actúa como **Product Owner** del Proyecto Guía y lo desarrolla en v
 cada equipo, en paralelo, aplica el mismo día lo aprendido en su **proyecto paralelo**.
 
 
-## Avance de la Clase 4 (Día 4 · Sprint 1)
+## Cierre del Sprint 1 (Clase 5 · Día 5)
 
-Este snapshot del repositorio corresponde al cierre del **Día 4**, cuyo tema fue
-*"Navegación, listas y formularios"*. Novedades respecto al Día 3:
+Este snapshot corresponde a la **entrega del Hito 1**: tema *"Pruebas alfa,
+control de versiones y cierre del Sprint 1"*. El incremento del Día 4
+(4 pestañas, lista, detalle y formulario) se completa con:
 
 | Carpeta / archivo | Qué contiene |
 |---|---|
-| `app/lib/routing/app_router.dart` | `go_router`: rutas `/inicio`, `/mapa`, `/nuevo`, `/perfil`, `ShellRoute` de pestañas y `/reporte/:id` |
-| `app/lib/screens/home_shell.dart` | **HU-02**: barra inferior con 4 pestañas (Inicio · Mapa · Nuevo · Perfil) |
-| `app/lib/data/report.dart` | Modelo `Report` con `fromJson`/`toJson` (listo para Supabase en el Hito 2) |
-| `app/lib/data/mock_reports.dart` | 8 reportes simulados de La Paz y El Alto + `cargarReportes()` async |
-| `app/lib/screens/reports_list_screen.dart` | **HU-03**: `ListView.builder` con estados cargando / error / vacío |
-| `app/lib/screens/report_detail_screen.dart` | **HU-04**: detalle con parámetro de ruta; muestra todos los campos |
-| `app/lib/screens/new_report_screen.dart` | **HU-05**: `Form` + `TextFormField` + validadores; no envía si es inválido |
-| `app/lib/screens/welcome_screen.dart` | **HU-01** actualizada: "Entrar" navega a `/inicio` (go_router) |
-| `app/test/widget_test.dart` | Pruebas del flujo HU-01 → HU-02 → HU-03 → HU-04 |
-| `app/test/form_validation_test.dart` | Pruebas de validación de la HU-05 (3 casos) |
-| `docs/15-bitacora-dia4.md` | Plantilla de bitácora del equipo para el Día 4 |
-| `docs/16-avance-git-dia4.md` | Guía de commits y Pull Request del Día 4 |
+| `app/lib/theme/app_theme.dart` | **HU-06**: tema claro + tema oscuro con la misma semilla (Material 3) |
+| `app/lib/main.dart` | `darkTheme` + `themeMode: ThemeMode.system` (respeta la configuración del sistema) |
+| `app/test/alfa_test.dart` | **Pruebas alfa automatizadas**: HU-06 (dos temas), conteo de 8 tarjetas (HU-03) y caso de borde del detalle (HU-04) |
+| `docs/17-casos-prueba-alfa.md` | Planilla de 10 casos de prueba alfa del Sprint 1 (pasos, esperado, real, estado) |
+| `docs/18-sprint-review-1.md` | Acta del **Sprint Review 1**: demo del incremento y ajustes al Product Backlog |
+| `docs/19-retrospectiva-1.md` | Acta de la **Retrospectiva 1** (Start / Stop / Continue) con 2 acciones de mejora |
+| `docs/20-informe-1.md` | **Informe 1 (entregable del Hito 1)**: matriz de decisión, wireframes, app y reporte de pruebas alfa |
+| `docs/21-avance-git-dia5.md` | Guía de commits del día, GitFlow simplificado y publicación del **release v0.1** |
+| `docs/22-bitacora-dia5.md` | Bitácora del Día 5 con el registro de la prueba individual del LMS |
 
-**Evidencia del día:** lista de cotejo de funcionalidades del Sprint 1 (HU-01 a HU-05),
-aplicada al cierre del laboratorio → evaluada con la Matriz 1 (Hito 1, 20 pts).
-El foro del LMS (UX móvil vs. web responsive) es la evidencia del trabajo autónomo.
+**Release v0.1 del producto**: tag `v0.4.0-dia5` (historial: `v0.0.0-sprint0` →
+`v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5`), 9 pruebas en verde
+y `fvm flutter analyze` sin advertencias. Evidencia oficial del día: **Informe 1 +
+app sencilla con framework**, evaluada con la Matriz 1 (Hito 1, 20 pts).
 
 ## Visión del producto
 
