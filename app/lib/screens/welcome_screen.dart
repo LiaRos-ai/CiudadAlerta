@@ -1,16 +1,16 @@
-// CiudadAlerta - Pantalla de bienvenida e inicio de sesion (Clase 3 / Dia 3)
+// CiudadAlerta - Pantalla de bienvenida e inicio de sesion (Clase 4 / Dia 4)
 // HU-01: Como ciudadano quiero ver una pantalla de bienvenida e inicio de
 // sesion para acceder a la app.  (solo UI: la autenticacion llega en el Hito 2)
 //
-// Criterios de aceptacion:
-//  - Pantalla con logo, campos y boton.
-//  - Sin errores de layout en 2 tamanos de pantalla (rota el emulador).
+// NOVEDAD DEL DIA 4: el boton Entrar ya no es un boton muerto; navega al
+// shell de pestañas con context.go('/inicio') (HU-02). Es la primera
+// conexión entre dos historias de usuario: HU-01 -> HU-02.
 //
-// Concepto del dia: StatefulWidget + setState. El estado local _ocultarClave
-// alterna la visibilidad de la contrasena; sin setState la pantalla no se
-// redibuja (error intencional explicado en la clase).
+// Concepto heredado del Dia 3: StatefulWidget + setState para el estado
+// local _ocultarClave (visibilidad de la contrasena).
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_input.dart';
 
@@ -86,10 +86,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         CustomButton(
           text: 'Entrar',
           icon: Icons.login,
-          onPressed: () {}, // Hito 2: aquí irá la autenticación con Supabase
+          // Dia 4: navega al shell de pestañas (HU-02). go() reemplaza la
+          // pantalla actual; push() apilaría una nueva encima.
+          onPressed: () => context.go('/inicio'),
         ),
         TextButton(
-          onPressed: () {}, // Día 4: navegará al formulario de registro
+          onPressed: () {}, // Hito 2: formulario de registro (Supabase Auth)
           child: const Text('Crear cuenta'),
         ),
       ],
