@@ -1,19 +1,24 @@
 // CiudadAlerta - Proyecto Guia · Aplicaciones Moviles I (SIS-0180)
-// Clase 2 (Dia 2): primera app creada con `flutter create`.
+// Clase 3 (Dia 3): Dart y Flutter - widgets, estado y estilos.
 //
-// Es la app contador estandar de Flutter. Su unica mision es verificar que el
-// entorno completo funciona: SDK + emulador/dispositivo + hot reload.
+// La app estrena su primera pantalla real (HU-01) y su tema propio:
+//   lib/theme/app_theme.dart      -> ThemeData con Material 3 (semilla #329B67)
+//   lib/widgets/custom_button.dart -> CustomButton (reutilizable)
+//   lib/widgets/custom_input.dart  -> CustomInput (reutilizable)
+//   lib/widgets/report_card.dart   -> ReportCard (primer StatelessWidget con datos)
+//   lib/screens/welcome_screen.dart-> WelcomeScreen (HU-01, solo UI, con setState)
 //
-// Practica de hot reload (Laboratorio de la Clase 2):
-//   1. Ejecuta la app (F5 en VS Code o `flutter run`).
-//   2. Cambia el texto "Presionaste el boton tantas veces:" por otro texto.
-//   3. Guarda (Ctrl+S) y mira como la pantalla se actualiza sin recompilar.
+// Practica de la clase:
+//   1. Corre la app (fvm flutter run) y mira la pantalla de bienvenida.
+//   2. Toca "Mostrar/Ocultar contrasena": es el setState del dia.
+//   3. Rota el emulador (Ctrl+izquierda): HU-01 no debe romper el layout.
+//   4. Cambia el seedColor en app_theme.dart, guarda (Ctrl+S) y mira el hot reload.
 
 import 'package:flutter/material.dart';
+import 'theme/app_theme.dart';
+import 'screens/welcome_screen.dart';
 
-void main() {
-  runApp(const CiudadAlertaApp());
-}
+void main() => runApp(const CiudadAlertaApp());
 
 class CiudadAlertaApp extends StatelessWidget {
   const CiudadAlertaApp({super.key});
@@ -22,55 +27,9 @@ class CiudadAlertaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CiudadAlerta',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-      ),
-      home: const ContadorPage(),
-    );
-  }
-}
-
-class ContadorPage extends StatefulWidget {
-  const ContadorPage({super.key});
-
-  @override
-  State<ContadorPage> createState() => _ContadorPageState();
-}
-
-class _ContadorPageState extends State<ContadorPage> {
-  int _veces = 0;
-
-  void _incrementar() {
-    setState(() {
-      _veces++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('CiudadAlerta · Dia 2'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Presionaste el boton tantas veces:'),
-            Text(
-              '$_veces',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementar,
-        tooltip: 'Incrementar',
-        child: const Icon(Icons.add),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: temaCiudadAlerta(),      // tema propio del curso (Material 3)
+      home: const WelcomeScreen(),    // HU-01: bienvenida e inicio de sesion
     );
   }
 }

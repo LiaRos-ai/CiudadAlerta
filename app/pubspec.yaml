@@ -1,7 +1,7 @@
 name: ciudadalerta
-description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). App contador creada en la Clase 2 con flutter create."
+description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Primera pantalla (HU-01), tema ThemeData y widgets reutilizables (Clase 3)."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.2.0+1
 
 environment:
   # Version congelada del curso (FVM). Ver docs/07-convenciones-git.md
