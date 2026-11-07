@@ -1,0 +1,21 @@
+name: ciudadalerta
+description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Primera pantalla (HU-01), tema ThemeData y widgets reutilizables (Clase 3)."
+publish_to: 'none'
+version: 0.2.0+1
+
+environment:
+  # Version congelada del curso (FVM). Ver docs/07-convenciones-git.md
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

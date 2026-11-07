@@ -1,0 +1,23 @@
+# Ignorado a nivel de la carpeta app/ (complementa el .gitignore de la raíz)
+
+# Artefactos de compilación de Flutter
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/flutter_sdk
+.fvmrc
+
+# Android local
+android/local.properties
+android/.gradle/
+android/app/*.keystore
+android/app/*.jks
+android/key.properties
+
+# iOS local (solo se compila en macOS)
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+
+# pubspec.lock: en apps se versiona; se mantiene para congelar versiones (regla del curso)

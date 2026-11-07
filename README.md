@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 0 · Día 1 — Repositorio creado en la Clase 1**
+**Sprint 1 · Día 3 — Avance de la Clase 3: Dart y Flutter (widgets, estado y estilos)**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -9,6 +9,28 @@ y dar seguimiento transparente al estado de cada reporte.
 
 El docente actúa como **Product Owner** del Proyecto Guía y lo desarrolla en vivo (live coding);
 cada equipo, en paralelo, aplica el mismo día lo aprendido en su **proyecto paralelo**.
+
+
+## Avance de la Clase 3 (Día 3 · Sprint 1)
+
+Este snapshot del repositorio corresponde al cierre del **Día 3**, cuyo tema fue
+*"Dart y Flutter: widgets, estado y estilos"*. Novedades respecto al Día 2:
+
+| Carpeta / archivo | Qué contiene |
+|---|---|
+| `app/lib/theme/app_theme.dart` | Tema propio del curso con `ThemeData` y Material 3 (semilla verde #329B67) |
+| `app/lib/widgets/custom_button.dart` | `CustomButton`: botón reutilizable que hereda el estilo del tema |
+| `app/lib/widgets/custom_input.dart` | `CustomInput`: campo de texto reutilizable (label, hint, obscure) |
+| `app/lib/widgets/report_card.dart` | `ReportCard`: primer `StatelessWidget` con datos de un reporte |
+| `app/lib/screens/welcome_screen.dart` | **HU-01**: pantalla de bienvenida e inicio de sesión (solo UI, con `setState`) |
+| `app/test/widget_test.dart` | Prueba de widgets de la HU-01 (incluye el toggle de contraseña) |
+| `docs/13-bitacora-dia3.md` | Plantilla de bitácora del equipo para el Día 3 (incluye rotación piloto/copiloto) |
+| `docs/14-avance-git-dia3.md` | Guía de commits y Pull Request del Día 3 |
+
+**Evidencia del día:** commits convencionales (`feat:`, `fix:`, `test:`, `docs:`) y
+Pull Request revisado en la revisión de código cruzada → evaluados con la Matriz 1
+(Hito 1, 20 pts). El cuestionario de 10 preguntas del LMS es la evidencia del
+trabajo autónomo.
 
 ## Visión del producto
 
@@ -52,7 +74,7 @@ con FVM y `pubspec.lock`. No ejecutar `flutter upgrade` durante el semestre.
 ```
 ciudadalerta/
 ├── README.md                  ← este archivo
-├── docs/                      ← artefactos del Sprint 0
+├── docs/                      ← artefactos del Sprint 0 y bitácoras diarias
 │   ├── 01-product-vision-board.md
 │   ├── 02-personas.md
 │   ├── 03-product-backlog.md  (27 historias de usuario, 118 puntos)
@@ -60,8 +82,15 @@ ciudadalerta/
 │   ├── 05-definition-of-ready.md
 │   ├── 06-working-agreement.md
 │   ├── 07-convenciones-git.md
-│   └── 08-sprint-planning-1.md
-└── app/                       ← código Flutter (se crea en el Día 2 con flutter create)
+│   ├── 08-sprint-planning-1.md
+│   ├── 09-matriz-decision-framework.md
+│   ├── 10-bitacora-dia2.md
+│   ├── 12-avance-git-dia2.md
+│   ├── 13-bitacora-dia3.md
+│   └── 14-avance-git-dia3.md
+├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
+├── wireframes/                ← plantilla de wireframes (Día 2)
+└── app/                       ← código Flutter (HU-01 + widgets desde el Día 3)
 ```
 
 ## Equipo y roles Scrum
