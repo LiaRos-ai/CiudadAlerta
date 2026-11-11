@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 1 · Día 5 — Cierre del Sprint 1: pruebas alfa, control de versiones y release v0.1**
+**Sprint 2 · Día 6 — Inicio del Hito 2: arquitectura por capas, Riverpod y persistencia local**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -11,28 +11,47 @@ El docente actúa como **Product Owner** del Proyecto Guía y lo desarrolla en v
 cada equipo, en paralelo, aplica el mismo día lo aprendido en su **proyecto paralelo**.
 
 
-## Cierre del Sprint 1 (Clase 5 · Día 5)
+## Inicio del Sprint 2 (Clase 6 · Día 6)
 
-Este snapshot corresponde a la **entrega del Hito 1**: tema *"Pruebas alfa,
-control de versiones y cierre del Sprint 1"*. El incremento del Día 4
-(4 pestañas, lista, detalle y formulario) se completa con:
+Este snapshot corresponde al **primer día del Hito 2**: tema *"Sprint Planning 2:
+SDK híbridos, arquitectura y persistencia local"*. La app del Hito 1
+(HU-01 a HU-06, release v0.1) se refactoriza y se amplía con:
 
 | Carpeta / archivo | Qué contiene |
 |---|---|
-| `app/lib/theme/app_theme.dart` | **HU-06**: tema claro + tema oscuro con la misma semilla (Material 3) |
-| `app/lib/main.dart` | `darkTheme` + `themeMode: ThemeMode.system` (respeta la configuración del sistema) |
-| `app/test/alfa_test.dart` | **Pruebas alfa automatizadas**: HU-06 (dos temas), conteo de 8 tarjetas (HU-03) y caso de borde del detalle (HU-04) |
-| `docs/17-casos-prueba-alfa.md` | Planilla de 10 casos de prueba alfa del Sprint 1 (pasos, esperado, real, estado) |
-| `docs/18-sprint-review-1.md` | Acta del **Sprint Review 1**: demo del incremento y ajustes al Product Backlog |
-| `docs/19-retrospectiva-1.md` | Acta de la **Retrospectiva 1** (Start / Stop / Continue) con 2 acciones de mejora |
-| `docs/20-informe-1.md` | **Informe 1 (entregable del Hito 1)**: matriz de decisión, wireframes, app y reporte de pruebas alfa |
-| `docs/21-avance-git-dia5.md` | Guía de commits del día, GitFlow simplificado y publicación del **release v0.1** |
-| `docs/22-bitacora-dia5.md` | Bitácora del Día 5 con el registro de la prueba individual del LMS |
+| `docs/23-sprint-planning-2.md` | Acta del **Sprint Planning 2**: meta del Sprint 2 y **Sprint Backlog 2** (HU-07 a HU-13, evidencia oficial del día) |
+| `app/lib/data/reports_repository.dart` | **Arquitectura por capas**: interfaz `ReportsRepository` + `MockReportsRepository` (única puerta a los datos) |
+| `app/lib/providers/reports_provider.dart` | **Estado global con Riverpod**: `FutureProvider` de reportes con `AsyncValue` |
+| `app/lib/main.dart` | `ProviderScope` de Riverpod envolviendo la app |
+| `app/lib/screens/reports_list_screen.dart` | Lista migrada de `FutureBuilder` a `ref.watch(...).when(...)` (mismos 4 estados, HU-03) |
+| `app/lib/data/draft_store.dart` | **HU-07**: borradores de reporte con `shared_preferences` (persisten al cerrar la app) |
+| `app/lib/screens/new_report_screen.dart` | Formulario HU-05 que guarda el borrador en cada cambio y lo restaura al volver (HU-07) |
+| `app/test/draft_provider_test.dart` | Pruebas del borrador (con `SharedPreferences.setMockInitialValues`) y del repositorio/provider |
+| `docs/24-arquitectura-capas.md` | Registro de decisión: capas, por qué Riverpod y por qué `shared_preferences` y no `sqflite`/`secure_storage` |
+| `docs/25-avance-git-dia6.md` | Guía de commits del Día 6 y etiqueta `v0.5.0-dia6` |
+| `docs/26-bitacora-dia6.md` | Bitácora del Día 6 con el registro del Planning 2 y de HU-07 |
 
-**Release v0.1 del producto**: tag `v0.4.0-dia5` (historial: `v0.0.0-sprint0` →
-`v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5`), 9 pruebas en verde
-y `fvm flutter analyze` sin advertencias. Evidencia oficial del día: **Informe 1 +
-app sencilla con framework**, evaluada con la Matriz 1 (Hito 1, 20 pts).
+**Avance del producto**: tag `v0.5.0-dia6` (historial: `v0.0.0-sprint0` →
+`v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5` → `v0.5.0-dia6`),
+`fvm flutter analyze` sin advertencias y `fvm flutter test` en verde.
+Evidencia oficial del día: **Sprint Backlog 2 publicado en el tablero**.
+
+### Camino del Sprint 2 (Hito 2)
+
+| Día | Tema | HU |
+|---|---|---|
+| 6 ✅ | Arquitectura por capas, Riverpod y persistencia local | HU-07 |
+| 7 | Bases de datos: modelado ER, SQL y Supabase | esquema + seed |
+| 8 | CRUD, consultas y presentación de datos | HU-09, HU-10, HU-13 |
+| 9 | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
+| 10 | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
+
+## Cierre del Sprint 1 (referencia · Día 5)
+
+El Hito 1 cerró con el release v0.1 (tag `v0.4.0-dia5`): tema claro/oscuro (HU-06),
+pruebas alfa documentadas (`docs/17`), actas de Review y Retrospectiva (`docs/18-19`),
+Informe 1 (`docs/20`) y guía de release (`docs/21-22`). Ese incremento es la base
+estable sobre la que arranca el Sprint 2.
 
 ## Visión del producto
 
@@ -91,10 +110,20 @@ ciudadalerta/
 │   ├── 13-bitacora-dia3.md
 │   ├── 14-avance-git-dia3.md
 │   ├── 15-bitacora-dia4.md
-│   └── 16-avance-git-dia4.md
+│   ├── 16-avance-git-dia4.md
+│   ├── 17-casos-prueba-alfa.md
+│   ├── 18-sprint-review-1.md
+│   ├── 19-retrospectiva-1.md
+│   ├── 20-informe-1.md
+│   ├── 21-avance-git-dia5.md
+│   ├── 22-bitacora-dia5.md
+│   ├── 23-sprint-planning-2.md
+│   ├── 24-arquitectura-capas.md
+│   ├── 25-avance-git-dia6.md
+│   └── 26-bitacora-dia6.md
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01 a HU-05 desde el Día 4)
+└── app/                       ← código Flutter (HU-01 a HU-07; capas + Riverpod desde el Día 6)
 ```
 
 ## Equipo y roles Scrum

@@ -1,7 +1,7 @@
 name: ciudadalerta
-description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Navegación con go_router (HU-02), lista de reportes (HU-03), detalle (HU-04) y formulario validado (HU-05). Clase 4."
+description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Arquitectura por capas con Riverpod (Clase 6), borradores locales (HU-07) y el flujo del Sprint 1 (HU-01..HU-06)."
 publish_to: 'none'
-version: 0.3.0+1
+version: 0.5.0+1
 
 environment:
   # Version congelada del curso (FVM). Ver docs/07-convenciones-git.md
@@ -13,6 +13,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   # Dia 4: navegación declarativa (rutas, parámetros y ShellRoute)
   go_router: ^14.2.0
+  # Dia 6: estado global declarativo (Sprint 2 - Hito 2)
+  flutter_riverpod: ^2.5.1
+  # Dia 6 / HU-07: persistencia local de borradores (clave-valor)
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

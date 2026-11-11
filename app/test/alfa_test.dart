@@ -5,10 +5,12 @@
 //   2. HU-03: la lista renderiza los 8 reportes mock (conteo exacto).
 //   3. HU-04: id inexistente muestra mensaje claro, sin crash (caso de borde).
 //
+// Dia 6: los tests de lista se montan dentro de ProviderScope (Riverpod).
 // Comandos: fvm flutter test test/alfa_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ciudadalerta/main.dart';
 import 'package:ciudadalerta/screens/report_detail_screen.dart';
 import 'package:ciudadalerta/theme/app_theme.dart';
@@ -24,7 +26,7 @@ void main() {
     expect(oscuro.colorScheme.brightness, Brightness.dark);
 
     // La app (MaterialApp.router) declara AMBOS temas y respeta el sistema
-    await tester.pumpWidget(const CiudadAlertaApp());
+    await tester.pumpWidget(const ProviderScope(child: CiudadAlertaApp()));
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.darkTheme, isNotNull);
     expect(app.themeMode, ThemeMode.system);
@@ -32,7 +34,7 @@ void main() {
 
   testWidgets('HU-03: la lista renderiza los 8 reportes mock completos',
       (tester) async {
-    await tester.pumpWidget(const CiudadAlertaApp());
+    await tester.pumpWidget(const ProviderScope(child: CiudadAlertaApp()));
     await tester.tap(find.text('Entrar'));
     await tester.pumpAndSettle(); // espera la "carga" del mock (600 ms)
 

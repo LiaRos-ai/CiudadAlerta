@@ -1,13 +1,17 @@
-// CiudadAlerta - Pruebas de widgets (Clase 4 / Dia 4)
+// CiudadAlerta - Pruebas de widgets (Clase 4 / Dia 4, actualizadas Dia 6)
 // Verifica el flujo completo del Dia: HU-01 -> HU-02 -> HU-03 -> HU-04.
+// Dia 6: la app vive dentro de un ProviderScope (Riverpod); los tests
+// montan el mismo arbol que production para que ref.watch encuentre providers.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:ciudadalerta/main.dart';
 
 void main() {
   testWidgets('HU-01: la pantalla de bienvenida muestra el formulario y '
       'valida el toggle de contraseña', (tester) async {
-    await tester.pumpWidget(const CiudadAlertaApp());
+    await tester.pumpWidget(const ProviderScope(child: CiudadAlertaApp()));
 
     expect(find.text('CiudadAlerta'), findsWidgets);
     expect(find.text('Entrar'), findsOneWidget);
@@ -21,7 +25,7 @@ void main() {
 
   testWidgets('HU-02 + HU-03: Entrar navega al shell de pestañas y la '
       'lista muestra los reportes mock', (tester) async {
-    await tester.pumpWidget(const CiudadAlertaApp());
+    await tester.pumpWidget(const ProviderScope(child: CiudadAlertaApp()));
 
     await tester.tap(find.text('Entrar'));
     await tester.pumpAndSettle(); // espera la "carga" del mock (600 ms)
@@ -40,7 +44,7 @@ void main() {
 
   testWidgets('HU-04: tocar un reporte navega a su detalle con parámetro',
       (tester) async {
-    await tester.pumpWidget(const CiudadAlertaApp());
+    await tester.pumpWidget(const ProviderScope(child: CiudadAlertaApp()));
 
     await tester.tap(find.text('Entrar'));
     await tester.pumpAndSettle();
