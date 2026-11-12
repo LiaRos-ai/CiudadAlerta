@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 2 · Día 6 — Inicio del Hito 2: arquitectura por capas, Riverpod y persistencia local**
+**Sprint 2 · Día 7 — La base de datos del Hito 2: modelo ER, SQL y Supabase**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -11,37 +11,35 @@ El docente actúa como **Product Owner** del Proyecto Guía y lo desarrolla en v
 cada equipo, en paralelo, aplica el mismo día lo aprendido en su **proyecto paralelo**.
 
 
-## Inicio del Sprint 2 (Clase 6 · Día 6)
+## Base de datos del Sprint 2 (Clase 7 · Día 7)
 
-Este snapshot corresponde al **primer día del Hito 2**: tema *"Sprint Planning 2:
-SDK híbridos, arquitectura y persistencia local"*. La app del Hito 1
-(HU-01 a HU-06, release v0.1) se refactoriza y se amplía con:
+Este snapshot corresponde al **segundo día del Hito 2**: tema *"Bases de datos
+para móviles: modelado relacional, SQL y Supabase (PostgreSQL)"*. La app del
+Día 6 (capas + Riverpod + HU-07) recibe hoy su **modelo de datos**: la
+evidencia oficial del día es el **Esquema ER + script SQL (lista de cotejo)**.
 
 | Carpeta / archivo | Qué contiene |
 |---|---|
-| `docs/23-sprint-planning-2.md` | Acta del **Sprint Planning 2**: meta del Sprint 2 y **Sprint Backlog 2** (HU-07 a HU-13, evidencia oficial del día) |
-| `app/lib/data/reports_repository.dart` | **Arquitectura por capas**: interfaz `ReportsRepository` + `MockReportsRepository` (única puerta a los datos) |
-| `app/lib/providers/reports_provider.dart` | **Estado global con Riverpod**: `FutureProvider` de reportes con `AsyncValue` |
-| `app/lib/main.dart` | `ProviderScope` de Riverpod envolviendo la app |
-| `app/lib/screens/reports_list_screen.dart` | Lista migrada de `FutureBuilder` a `ref.watch(...).when(...)` (mismos 4 estados, HU-03) |
-| `app/lib/data/draft_store.dart` | **HU-07**: borradores de reporte con `shared_preferences` (persisten al cerrar la app) |
-| `app/lib/screens/new_report_screen.dart` | Formulario HU-05 que guarda el borrador en cada cambio y lo restaura al volver (HU-07) |
-| `app/test/draft_provider_test.dart` | Pruebas del borrador (con `SharedPreferences.setMockInitialValues`) y del repositorio/provider |
-| `docs/24-arquitectura-capas.md` | Registro de decisión: capas, por qué Riverpod y por qué `shared_preferences` y no `sqflite`/`secure_storage` |
-| `docs/25-avance-git-dia6.md` | Guía de commits del Día 6 y etiqueta `v0.5.0-dia6` |
-| `docs/26-bitacora-dia6.md` | Bitácora del Día 6 con el registro del Planning 2 y de HU-07 |
+| `docs/27-modelo-er.md` | **Modelo entidad-relación** de CiudadAlerta: 5 entidades, PK/FK, cardinalidades y normalización 1FN–3FN (mitad "esquema" de la evidencia) |
+| `db/schema.sql` | **DDL en PostgreSQL**: CREATE TABLE de `profiles`, `categories`, `reports`, `comments`, `report_photos` con constraints, índices y RLS habilitada |
+| `db/seed.sql` | **Datos semilla**: las 5 categorías, 4 perfiles y los 8 reportes RPT-001..008 replicando el mock de la app, más comentarios y fotos |
+| `db/consultas.sql` | **10 consultas de práctica** (C01–C10): filtros, JOIN, GROUP BY y agregados que preparan HU-09 y HU-13 |
+| `app/test/data_contract_test.dart` | Test de **contrato app ↔ BD**: categorías, estados y códigos del mock deben coincidir con el seed |
+| `docs/28-script-sql.md` | Decisiones del script: DDL vs DML, RLS, Supabase (API REST autogenerada), BaaS vs backend propio, SQL vs NoSQL |
+| `docs/29-avance-git-dia7.md` | Guía de commits del Día 7 y etiqueta `v0.6.0-dia7` |
+| `docs/30-bitacora-dia7.md` | Bitácora del Día 7 con el registro del ER y la revisión por pares de normalización |
 
-**Avance del producto**: tag `v0.5.0-dia6` (historial: `v0.0.0-sprint0` →
-`v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5` → `v0.5.0-dia6`),
-`fvm flutter analyze` sin advertencias y `fvm flutter test` en verde.
-Evidencia oficial del día: **Sprint Backlog 2 publicado en el tablero**.
+**Avance del producto**: tag `v0.6.0-dia7` (historial: `v0.0.0-sprint0` →
+`v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5` → `v0.5.0-dia6` →
+`v0.6.0-dia7`), `fvm flutter analyze` sin advertencias y `fvm flutter test`
+en verde (17 pruebas). Evidencia oficial del día: **Esquema ER + script SQL**.
 
 ### Camino del Sprint 2 (Hito 2)
 
 | Día | Tema | HU |
 |---|---|---|
 | 6 ✅ | Arquitectura por capas, Riverpod y persistencia local | HU-07 |
-| 7 | Bases de datos: modelado ER, SQL y Supabase | esquema + seed |
+| 7 ✅ | Bases de datos: modelado ER, SQL y Supabase | esquema + seed |
 | 8 | CRUD, consultas y presentación de datos | HU-09, HU-10, HU-13 |
 | 9 | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
 | 10 | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
