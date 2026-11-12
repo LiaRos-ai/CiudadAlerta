@@ -4,9 +4,12 @@ Creada con `flutter create` en el **Día 2**, convertida en flujo navegable en
 el **Día 4** (navegación con `go_router` HU-02, lista con datos mock HU-03,
 detalle con parámetro de ruta HU-04 y formulario validado HU-05), **cerrada
 como entrega del Sprint 1 en el Día 5** (pruebas alfa, tema claro/oscuro HU-06,
-release v0.1, tag `v0.4.0-dia5`) y **refactorizada en el Día 6 para arrancar
-el Sprint 2**: arquitectura por capas con `ReportsRepository`, estado global
-con Riverpod y borradores locales con `shared_preferences` (**HU-07**).
+release v0.1, tag `v0.4.0-dia5`), **refactorizada en el Día 6 para arrancar
+el Sprint 2** (arquitectura por capas con `ReportsRepository`, estado global
+con Riverpod y borradores locales con `shared_preferences`, **HU-07**) y
+**conectada a su modelo de datos en el Día 7**: el esquema ER y el script SQL
+de Supabase (`../db/`) se versionan junto a la app y un test de contrato
+verifica que app y BD hablan el mismo idioma.
 
 ## Cómo ejecutarla
 
@@ -14,7 +17,7 @@ con Riverpod y borradores locales con `shared_preferences` (**HU-07**).
 cd app
 fvm flutter pub get          # descarga dependencias (go_router, flutter_riverpod, shared_preferences)
 fvm flutter run              # elige el emulador AVD o tu celular por USB
-fvm flutter test             # pruebas de widgets, formulario, alfa y borrador (14 en total)
+fvm flutter test             # pruebas de widgets, formulario, alfa, borrador y contrato app-BD (17)
 fvm flutter analyze          # sin advertencias antes de cada commit
 ```
 
@@ -28,7 +31,11 @@ fvm flutter analyze          # sin advertencias antes de cada commit
 - **HU-07 (Día 6)**: escribe medio reporte, CIERRA la app y reábrelo: el borrador
   se restaura con un SnackBar. Al enviar con éxito, el borrador se limpia.
 - **Pruebas alfa (Día 5)**: recorre los casos de `docs/17-casos-prueba-alfa.md`,
-  ejecuta `fvm flutter analyze` (limpio) y `fvm flutter test` (14 pruebas verdes).
+  ejecuta `fvm flutter analyze` (limpio) y `fvm flutter test` (17 pruebas verdes).
+- **Base de datos (Día 7)**: `../db/schema.sql`, `../db/seed.sql` y
+  `../db/consultas.sql` son el esquema ER hecho código; `test/data_contract_test.dart`
+  verifica que la app (categorías, estados, RPT-001..008) y el seed coincidan.
+  El Día 8 el mock será reemplazado por `SupabaseReportsRepository`.
 - **Hot reload**: guarda el archivo (`Ctrl+S`) → la pantalla se actualiza sin recompilar.
 
 ## Estructura
@@ -59,7 +66,8 @@ app/
 ├── test/form_validation_test.dart ← HU-05: validación del formulario (3 casos)
 ├── test/alfa_test.dart            ← Día 5: pruebas alfa (HU-06, conteo HU-03, borde HU-04)
 ├── test/draft_provider_test.dart  ← Día 6: borrador HU-07 + repositorio + provider (5 pruebas)
-├── pubspec.yaml                   ← dependencias (go_router, flutter_riverpod, shared_preferences), versión 0.5.0+1
+├── test/data_contract_test.dart   ← Día 7: contrato app ↔ BD (categorías, estados, RPT)
+├── pubspec.yaml                   ← dependencias (go_router, flutter_riverpod, shared_preferences), versión 0.6.0+1
 └── analysis_options.yaml          ← reglas de estilo (flutter_lints)
 ```
 
@@ -83,9 +91,9 @@ app/
    son la lección del día.
 7. **Tema oscuro (HU-06)**: activa el modo oscuro del sistema; la app cambia
    sola. Los dos temas viven en `app_theme.dart` con la misma semilla.
-8. **Pruebas (Días 5-6)**: `fvm flutter test` deja 14 pruebas verdes; los casos
-   manuales de la planilla `docs/17-casos-prueba-alfa.md` y el borrador HU-07
-   son la evidencia continua del Hito 2.
+8. **Pruebas (Días 5-7)**: `fvm flutter test` deja 17 pruebas verdes; los casos
+   manuales de la planilla `docs/17-casos-prueba-alfa.md`, el borrador HU-07 y
+   el contrato app-BD del Día 7 son la evidencia continua del Hito 2.
 9. **Reto**: rompe a propósito la regla de capas — importa `mock_reports.dart`
    en una pantalla y llama a `cargarReportes()` — y discute en el equipo por qué
    eso rompería el cambio a Supabase del Día 8.
