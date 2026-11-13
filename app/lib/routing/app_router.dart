@@ -10,13 +10,15 @@
 //     de cada pestaña (IndexedStack): si vuelves a Inicio, la lista sigue
 //     donde la dejaste.
 //
-// Mapa de rutas del Dia 4:
+// Mapa de rutas del Dia 4 (+ Dia 8):
 //   /                 -> WelcomeScreen (HU-01, sin barra inferior)
-//   /inicio           -> ReportsListScreen   (pestaña 1, HU-03)
+//   /inicio           -> ReportsListScreen   (pestaña 1, HU-03/HU-09)
 //   /mapa             -> MapPlaceholderScreen(pestaña 2, HU-14 en Sprint 3)
-//   /nuevo            -> NewReportScreen     (pestaña 3, HU-05)
+//   /nuevo            -> NewReportScreen     (pestaña 3, HU-05/HU-10)
 //   /perfil           -> ProfileScreen       (pestaña 4, Hito 2 con Auth)
 //   /reporte/:id      -> ReportDetailScreen  (HU-04, fuera del shell)
+//   /editar/:id       -> NewReportScreen modo edicion (HU-10, Dia 8)
+//   /estadisticas     -> StatsScreen         (HU-13, Dia 8: GROUP BY + fl_chart)
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +29,7 @@ import 'screens/new_report_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/report_detail_screen.dart';
 import 'screens/reports_list_screen.dart';
+import 'screens/stats_screen.dart';
 import 'screens/welcome_screen.dart';
 
 final appRouter = GoRouter(
@@ -90,6 +93,23 @@ final appRouter = GoRouter(
         final id = state.pathParameters['id'] ?? '';
         return ReportDetailScreen(id: id);
       },
+    ),
+
+    // HU-10 (Dia 8): edicion reutilizando el formulario con modo edicion
+    GoRoute(
+      path: '/editar/:id',
+      name: 'editar',
+      builder: (context, state) {
+        final id = state.pathParameters['id'] ?? '';
+        return NewReportScreen(codigo: id);
+      },
+    ),
+
+    // HU-13 (Dia 8): estadisticas GROUP BY + grafico fl_chart
+    GoRoute(
+      path: '/estadisticas',
+      name: 'estadisticas',
+      builder: (context, state) => const StatsScreen(),
     ),
   ],
 );
