@@ -70,7 +70,9 @@ void main() {
   group('Arquitectura por capas: repositorio y provider', () {
     test('MockReportsRepository devuelve los 8 reportes y busca por id',
         () async {
-      const repo = MockReportsRepository();
+      // Dia 8: el mock ya no es const (lleva lista editable para el CRUD
+      // en modo demo). Cada instancia arranca con los 8 RPT-001..008.
+      final repo = MockReportsRepository();
 
       final reportes = await repo.obtenerReportes();
       expect(reportes.length, 8);

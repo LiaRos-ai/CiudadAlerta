@@ -49,10 +49,13 @@ void main() {
 
   testWidgets('HU-04: id inexistente muestra mensaje claro y no crashea',
       (tester) async {
-    // Caso de borde del Día 4, ahora automatizado como prueba alfa
-    await tester.pumpWidget(const MaterialApp(
-      home: ReportDetailScreen(id: 'RPT-999'),
+    // Caso de borde del Dia 4, ahora automatizado como prueba alfa.
+    // Dia 8: el detalle es ConsumerWidget y consulta por id (family
+    // provider), asi que necesita ProviderScope y esperar la consulta.
+    await tester.pumpWidget(const ProviderScope(
+      child: MaterialApp(home: ReportDetailScreen(id: 'RPT-999')),
     ));
+    await tester.pumpAndSettle();
 
     expect(find.textContaining('No existe el reporte'), findsOneWidget);
     expect(tester.takeException(), isNull); // sin excepciones = sin crash

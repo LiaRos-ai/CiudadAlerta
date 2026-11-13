@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 2 · Día 7 — La base de datos del Hito 2: modelo ER, SQL y Supabase**
+**Sprint 2 · Día 8 — La app se conecta a la base de datos: CRUD, consultas y presentación**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -11,28 +11,44 @@ El docente actúa como **Product Owner** del Proyecto Guía y lo desarrolla en v
 cada equipo, en paralelo, aplica el mismo día lo aprendido en su **proyecto paralelo**.
 
 
-## Base de datos del Sprint 2 (Clase 7 · Día 7)
+## Conexión a la BD del Sprint 2 (Clase 8 · Día 8)
 
-Este snapshot corresponde al **segundo día del Hito 2**: tema *"Bases de datos
-para móviles: modelado relacional, SQL y Supabase (PostgreSQL)"*. La app del
-Día 6 (capas + Riverpod + HU-07) recibe hoy su **modelo de datos**: la
-evidencia oficial del día es el **Esquema ER + script SQL (lista de cotejo)**.
+Este snapshot corresponde al **tercer día del Hito 2**: tema *"Conexión de la
+app a la BD: CRUD, consultas y presentación de datos"*. La app del Día 6
+(capas + Riverpod + HU-07) habla hoy con la base de datos creada el Día 7:
+la evidencia oficial del día es la **Demo funcional de CRUD y consultas
+(lista de cotejo)**.
 
 | Carpeta / archivo | Qué contiene |
 |---|---|
-| `docs/27-modelo-er.md` | **Modelo entidad-relación** de CiudadAlerta: 5 entidades, PK/FK, cardinalidades y normalización 1FN–3FN (mitad "esquema" de la evidencia) |
-| `db/schema.sql` | **DDL en PostgreSQL**: CREATE TABLE de `profiles`, `categories`, `reports`, `comments`, `report_photos` con constraints, índices y RLS habilitada |
-| `db/seed.sql` | **Datos semilla**: las 5 categorías, 4 perfiles y los 8 reportes RPT-001..008 replicando el mock de la app, más comentarios y fotos |
-| `db/consultas.sql` | **10 consultas de práctica** (C01–C10): filtros, JOIN, GROUP BY y agregados que preparan HU-09 y HU-13 |
-| `app/test/data_contract_test.dart` | Test de **contrato app ↔ BD**: categorías, estados y códigos del mock deben coincidir con el seed |
-| `docs/28-script-sql.md` | Decisiones del script: DDL vs DML, RLS, Supabase (API REST autogenerada), BaaS vs backend propio, SQL vs NoSQL |
-| `docs/29-avance-git-dia7.md` | Guía de commits del Día 7 y etiqueta `v0.6.0-dia7` |
-| `docs/30-bitacora-dia7.md` | Bitácora del Día 7 con el registro del ER y la revisión por pares de normalización |
+| `app/lib/data/supabase_config.dart` | **Cliente de Supabase** con credenciales por `--dart-define` (nunca en el repo) y **modo demo** sin credenciales |
+| `app/lib/data/supabase_reports_repository.dart` | **CRUD y consultas contra PostgreSQL**: filtro/orden con select anidado (HU-09), insert/update/delete (HU-10), agregados (HU-13) |
+| `app/lib/data/estadistica.dart` | Modelos de **estadísticas** con agrupado determinista (el GROUP BY de HU-13, equivalente al C06 del Día 7) |
+| `app/lib/data/reports_repository.dart` | Interfaz + mock con CRUD demo + **provider que decide la implementación** (Supabase o demo) |
+| `app/lib/providers/reports_provider.dart` | Providers de filtro, lista, detalle y estadísticas (AsyncValue) |
+| `app/lib/screens/stats_screen.dart` | **Pantalla de estadísticas** con gráfico de barras `fl_chart` (HU-13) |
+| `app/test/` | Suite de **31 pruebas** (contrato app ↔ BD, CRUD demo, filtros, agregados, widgets y estadísticas) |
+| `docs/31-conexion-supabase.md` | Decisiones de conexión: cliente, variables de entorno, mapeo SQL→API, AsyncValue y seguridad |
+| `docs/32-demo-crud-consultas.md` | **Guion de la demo funcional** (evidencia oficial): pasos y criterios observables |
+| `docs/33-avance-git-dia8.md` | Guía de commits del Día 8 y etiqueta `v0.7.0-dia8` |
+| `docs/34-bitacora-dia8.md` | Bitácora del Día 8 con el registro de la demo y el control de claves |
 
-**Avance del producto**: tag `v0.6.0-dia7` (historial: `v0.0.0-sprint0` →
+**Cómo correr la app hoy:**
+
+```bash
+fvm flutter run   # modo DEMO (mock): CRUD en memoria, sin credenciales
+
+# contra tu proyecto Supabase del Día 7 (claves fuera del repo):
+fvm flutter run \
+  --dart-define=SUPABASE_URL=https://TU-PROYECTO.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
+```
+
+**Avance del producto**: tag `v0.7.0-dia8` (historial: `v0.0.0-sprint0` →
 `v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5` → `v0.5.0-dia6` →
-`v0.6.0-dia7`), `fvm flutter analyze` sin advertencias y `fvm flutter test`
-en verde (17 pruebas). Evidencia oficial del día: **Esquema ER + script SQL**.
+`v0.6.0-dia7` → `v0.7.0-dia8`), `fvm flutter analyze` sin advertencias y
+`fvm flutter test` en verde (31 pruebas). Evidencia oficial del día:
+**Demo funcional de CRUD y consultas**.
 
 ### Camino del Sprint 2 (Hito 2)
 
@@ -40,7 +56,7 @@ en verde (17 pruebas). Evidencia oficial del día: **Esquema ER + script SQL**.
 |---|---|---|
 | 6 ✅ | Arquitectura por capas, Riverpod y persistencia local | HU-07 |
 | 7 ✅ | Bases de datos: modelado ER, SQL y Supabase | esquema + seed |
-| 8 | CRUD, consultas y presentación de datos | HU-09, HU-10, HU-13 |
+| 8 ✅ | CRUD, consultas y presentación de datos | HU-09, HU-10, HU-13 |
 | 9 | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
 | 10 | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
 
@@ -118,10 +134,19 @@ ciudadalerta/
 │   ├── 23-sprint-planning-2.md
 │   ├── 24-arquitectura-capas.md
 │   ├── 25-avance-git-dia6.md
-│   └── 26-bitacora-dia6.md
+│   ├── 26-bitacora-dia6.md
+│   ├── 27-modelo-er.md
+│   ├── 28-script-sql.md
+│   ├── 29-avance-git-dia7.md
+│   ├── 30-bitacora-dia7.md
+│   ├── 31-conexion-supabase.md
+│   ├── 32-demo-crud-consultas.md
+│   ├── 33-avance-git-dia8.md
+│   └── 34-bitacora-dia8.md
+├── db/                        ← SQL de Supabase: schema, seed y consultas (Día 7)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01 a HU-07; capas + Riverpod desde el Día 6)
+└── app/                       ← código Flutter (HU-01..HU-10 y HU-13; conectada a Supabase desde el Día 8)
 ```
 
 ## Equipo y roles Scrum
