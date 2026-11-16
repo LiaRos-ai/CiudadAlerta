@@ -63,7 +63,23 @@ día: **Casos de prueba de seguridad (lista de cotejo)**.
 | 7 ✅ | Bases de datos: modelado ER, SQL y Supabase | esquema + seed |
 | 8 ✅ | CRUD, consultas y presentación de datos | HU-09, HU-10, HU-13 |
 | 9 ✅ | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
-| 10 | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
+| 10 ✅ | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
+
+## Distribución del Día 10 (Clase 10 · Día 10)
+
+El Sprint 2 (Hito 2) cierra con el **APK release instalable (HU-12)** y el
+**Informe 2** sustentado (`docs/42`, Matriz 2). La identidad de la app quedó
+fija: `version: 0.9.0+1` en el pubspec, `applicationId com.ciudadalerta.app`
+y `minSdk 23` en `android/app/build.gradle`, ícono adaptativo y splash
+nativa generados desde `app/assets/icon/`, y los 3 permisos mínimos en el
+AndroidManifest. La firma release usa un keystore **local** (key.properties
+y *.jks están en `android/.gitignore`: MASVS — el keystore nunca entra al
+repo y se respalda fuera de él). El build verificable vive en
+`scripts/build_release.sh` (clean → pub get → analyze → 59 pruebas →
+`flutter build apk --release`) y la guía completa en `docs/39`. El cierre
+del sprint quedó documentado en el acta del Review 2 (`docs/40`), la
+retrospectiva con compromisos (`docs/41`) y la bitácora del refinamiento
+del Sprint 3 (`docs/44`). Tag de cierre: `v0.9.0-dia10` (112 commits).
 
 ## Cierre del Sprint 1 (referencia · Día 5)
 
@@ -151,11 +167,19 @@ ciudadalerta/
 │   ├── 35-seguridad-auth-rls.md
 │   ├── 36-casos-prueba-seguridad.md
 │   ├── 37-avance-git-dia9.md
-│   └── 38-bitacora-dia9.md
+│   ├── 38-bitacora-dia9.md
+│   ├── 39-distribucion-apk.md
+│   ├── 40-sprint-review-2.md
+│   ├── 41-retrospectiva-2.md
+│   ├── 42-informe-2.md
+│   ├── 43-avance-git-dia10.md
+│   └── 44-bitacora-dia10.md
 ├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7) y RLS + Storage (Día 9)
+├── android/                   ← build.gradle (applicationId + firma), AndroidManifest y key.properties.example (Día 10)
+├── scripts/                   ← build_release.sh: build release verificable (Día 10)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01..HU-11 y HU-13; auth + Storage desde el Día 9)
+└── app/                       ← código Flutter (HU-01..HU-13; auth + foto del Día 9, release del Día 10)
 ```
 
 ## Equipo y roles Scrum

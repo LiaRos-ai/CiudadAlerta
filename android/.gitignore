@@ -1,0 +1,4 @@
+# Día 10: el keystore y sus contraseñas NUNCA entran al repositorio
+key.properties
+*.jks
+*.keystore

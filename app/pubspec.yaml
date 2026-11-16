@@ -1,7 +1,7 @@
 name: ciudadalerta
 description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Arquitectura por capas con Riverpod (Clase 6), borradores locales (HU-07) y el flujo del Sprint 1 (HU-01..HU-06)."
 publish_to: 'none'
-version: 0.8.0+1
+version: 0.9.0+1
 
 environment:
   # Version congelada del curso (FVM). Ver docs/07-convenciones-git.md
@@ -31,6 +31,25 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  # Día 10 / HU-12: ícono y splash nativos del paquete instalable
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 flutter:
   uses-material-design: true
+
+# Día 10 / HU-12: ícono adaptativo generado desde el pin 1024px
+flutter_launcher_icons:
+  android: launcher_icon
+  ios: true
+  image_path: assets/icon/icon.png
+  adaptive_icon_background: "#0F1913"
+  adaptive_icon_foreground: assets/icon/icon_foreground.png
+
+# Día 10 / HU-12: splash nativa con la marca y el color del tema oscuro
+flutter_native_splash:
+  color: "#0F1913"
+  image: assets/icon/splash.png
+  android_12:
+    color: "#0F1913"
+    image: assets/icon/splash.png

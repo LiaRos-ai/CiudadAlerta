@@ -26,7 +26,7 @@ fvm flutter run \
   --dart-define=SUPABASE_URL=https://TU-PROYECTO.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
 
-fvm flutter test             # suite completa: 53 pruebas verdes
+fvm flutter test             # suite completa: 59 pruebas verdes
 fvm flutter analyze          # sin advertencias antes de cada commit
 ```
 
@@ -131,12 +131,17 @@ app/
    INSERT con botón bloqueado y SnackBar de confirmación.
 9. **Tema oscuro (HU-06)**: activa el modo oscuro del sistema; la app cambia
    sola. Los dos temas viven en `app_theme.dart` con la misma semilla.
-10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 53 pruebas verdes; el
+10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 59 pruebas verdes; el
    contrato app-BD y los casos SP-01..SP-12 de `docs/36` son la evidencia
    continua del Hito 2.
 11. **Reto**: intenta pegar la clave anon directamente en `main.dart` y luego
    ejecuta `git log -p` en el cierre del día: el control de seguridad debe
    demostrar por qué eso está prohibido (rotar claves y usar `--dart-define`).
+
+12. **APK release (HU-12, Día 10)**: `bash scripts/build_release.sh` genera
+   `app-release.apk` firmado (~9 MB, R8); instálalo con
+   `adb install -r build/app/outputs/flutter-apk/app-release.apk` y verifica
+   el ícono del pin, la splash nativa y la versión 0.9.0+1 en el Perfil.
 
 ## Regla del curso
 
