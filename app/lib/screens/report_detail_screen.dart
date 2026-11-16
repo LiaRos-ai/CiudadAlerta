@@ -1,4 +1,4 @@
-// CiudadAlerta - Detalle de reporte (Clase 4 -> 8)
+// CiudadAlerta - Detalle de reporte (Clase 4 -> 9)
 // HU-04: "Como ciudadano quiero ver el detalle de un reporte para conocer
 // su descripción y estado".
 //
@@ -14,6 +14,10 @@
 //     politica RLS que lo impide) se muestra con SnackBar, no con crash.
 //   - Los comentarios y fotos del reporte desaparecen solos:
 //     ON DELETE CASCADE en schema.sql (Dia 7).
+//
+// NOVEDAD Dia 9 (HU-11): miniatura de la evidencia fotografica. El URL
+// llega embebido del select anidado report_photos(url); si el reporte no
+// tiene foto, la seccion no se dibuja (contrato del Dia 7 intacto).
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,6 +203,41 @@ class _DetalleReporte extends StatelessWidget {
           Text(reporte.descripcion, style: theme.textTheme.bodyMedium),
           const SizedBox(height: 24),
 
+          // ---- Dia 9 (HU-11): miniatura de la evidencia fotografica ----
+          if (reporte.fotoUrl != null) ...[
+            Text('Evidencia fotográfica', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: GestureDetector(
+                // Tocar la miniatura la abre grande (interaccion natural)
+                onTap: () => _mostrarFotoCompleta(context, reporte.fotoUrl!),
+                child: Image.network(
+                  reporte.fotoUrl!,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progreso) {
+                    if (progreso == null) return child;
+                    return const SizedBox(
+                      height: 200,
+                      child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 200,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: const Center(
+                      child: Icon(Icons.image_not_supported_outlined, size: 40),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
           // Accion de seguimiento (el cambio de estado real llega en el
           // Hito 4 con el panel de moderación; hoy es demo visual)
           SizedBox(
@@ -210,6 +249,20 @@ class _DetalleReporte extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// HU-11: vista a pantalla completa de la evidencia (Dialog simple:
+  /// sin paquete adicional, el curso evita dependencias "porque si").
+  void _mostrarFotoCompleta(BuildContext context, String url) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: InteractiveViewer(
+          maxScale: 4,
+          child: Image.network(url, fit: BoxFit.contain),
+        ),
       ),
     );
   }

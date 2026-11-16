@@ -10,12 +10,13 @@
 //     de cada pestaña (IndexedStack): si vuelves a Inicio, la lista sigue
 //     donde la dejaste.
 //
-// Mapa de rutas del Dia 4 (+ Dia 8):
-//   /                 -> WelcomeScreen (HU-01, sin barra inferior)
+// Mapa de rutas del Dia 4 (+ Dia 8 + Dia 9):
+//   /                 -> WelcomeScreen (HU-01; Dia 9: autentica HU-08)
+//   /registro         -> RegisterScreen (HU-08, Dia 9: crear cuenta)
 //   /inicio           -> ReportsListScreen   (pestaña 1, HU-03/HU-09)
 //   /mapa             -> MapPlaceholderScreen(pestaña 2, HU-14 en Sprint 3)
-//   /nuevo            -> NewReportScreen     (pestaña 3, HU-05/HU-10)
-//   /perfil           -> ProfileScreen       (pestaña 4, Hito 2 con Auth)
+//   /nuevo            -> NewReportScreen     (pestaña 3, HU-05/HU-10/HU-11)
+//   /perfil           -> ProfileScreen       (pestaña 4; Dia 9: sesion real)
 //   /reporte/:id      -> ReportDetailScreen  (HU-04, fuera del shell)
 //   /editar/:id       -> NewReportScreen modo edicion (HU-10, Dia 8)
 //   /estadisticas     -> StatsScreen         (HU-13, Dia 8: GROUP BY + fl_chart)
@@ -27,6 +28,7 @@ import 'screens/home_shell.dart';
 import 'screens/map_placeholder_screen.dart';
 import 'screens/new_report_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/report_detail_screen.dart';
 import 'screens/reports_list_screen.dart';
 import 'screens/stats_screen.dart';
@@ -40,6 +42,13 @@ final appRouter = GoRouter(
       path: '/',
       name: 'bienvenida',
       builder: (context, state) => const WelcomeScreen(),
+    ),
+
+    // HU-08 (Dia 9): registro de cuenta (fuera del shell)
+    GoRoute(
+      path: '/registro',
+      name: 'registro',
+      builder: (context, state) => const RegisterScreen(),
     ),
 
     // HU-02: shell con barra de navegacion inferior de 4 pestañas

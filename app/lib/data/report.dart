@@ -1,4 +1,4 @@
-// CiudadAlerta - Modelo de dominio (Clase 4 / Dia 4)
+// CiudadAlerta - Modelo de dominio (Clase 4 / Dia 4, extendido Dia 9)
 //
 // El Dia 3 las tarjetas recibian Strings sueltos; hoy los datos viajan
 // agrupados en un MODELO de Dart. Un modelo es la "clase entidad" del curso:
@@ -6,6 +6,11 @@
 //
 // En el Hito 2 este mismo modelo llegara desde Supabase como JSON
 // (fromJson/toJson ya quedan listos para esa conexion).
+//
+// NOVEDAD Dia 9 (HU-11): fotoUrl, el URL publico de la evidencia en el
+// bucket 'fotos-reportes' de Storage. Es OPCIONAL y NULO por defecto:
+// los 8 reportes del seed nacen sin foto y ningun test existente cambia.
+// toJson la omite cuando es null: el contrato JSON del Dia 7 no cambia.
 
 class Report {
   const Report({
@@ -17,6 +22,7 @@ class Report {
     required this.estado,
     required this.zona,
     this.urgente = false,
+    this.fotoUrl,
   });
 
   final String id;          // Identificador unico (en el Hito 2: UUID de la BD)
@@ -27,6 +33,7 @@ class Report {
   final String estado;      // Recibido / En revision / En proceso / Resuelto
   final String zona;        // Zona urbana de La Paz o El Alto
   final bool urgente;       // true = prioridad para la municipalidad
+  final String? fotoUrl;    // Dia 9 (HU-11): URL publico en Storage (null = sin foto)
 
   /// Construccion desde un Map (asi llega el JSON de Supabase en el Hito 2).
   factory Report.fromJson(Map<String, dynamic> json) => Report(
@@ -38,6 +45,7 @@ class Report {
         estado: json['estado'] as String,
         zona: json['zona'] as String,
         urgente: json['urgente'] as bool? ?? false,
+        fotoUrl: json['foto_url'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -49,5 +57,7 @@ class Report {
         'estado': estado,
         'zona': zona,
         'urgente': urgente,
+        // HU-11: el campo solo viaja si hay foto (contrato del Dia 7 intacto).
+        if (fotoUrl != null) 'foto_url': fotoUrl,
       };
 }

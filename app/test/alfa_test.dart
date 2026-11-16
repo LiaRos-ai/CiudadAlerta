@@ -1,4 +1,4 @@
-// CiudadAlerta - Pruebas alfa de widgets (Clase 5 / Dia 5)
+// CiudadAlerta - Pruebas alfa de widgets (Clase 5 / Dia 5, ajustadas Dia 9)
 //
 // Introducción práctica a las pruebas de widgets, evidencia del Día 5:
 //   1. HU-06: la app declara tema claro y oscuro (misma semilla).
@@ -6,12 +6,16 @@
 //   3. HU-04: id inexistente muestra mensaje claro, sin crash (caso de borde).
 //
 // Dia 6: los tests de lista se montan dentro de ProviderScope (Riverpod).
+// Dia 9: el acceso al shell en pruebas es el boton "Explorar en modo demo"
+// (HU-08 convirtio Entrar en autenticacion real; ver widget_test.dart).
 // Comandos: fvm flutter test test/alfa_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ciudadalerta/data/auth_session.dart';
 import 'package:ciudadalerta/main.dart';
+import 'package:ciudadalerta/providers/auth_provider.dart';
 import 'package:ciudadalerta/screens/report_detail_screen.dart';
 import 'package:ciudadalerta/theme/app_theme.dart';
 import 'package:ciudadalerta/widgets/report_card.dart';
@@ -34,8 +38,12 @@ void main() {
 
   testWidgets('HU-03: la lista renderiza los 8 reportes mock completos',
       (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: CiudadAlertaApp()));
-    await tester.tap(find.text('Entrar'));
+    await tester.pumpWidget(ProviderScope(
+      // Dia 9: sesion con almacen en memoria (sin canal de plataforma)
+      overrides: [sessionStoreProvider.overrideWithValue(InMemorySessionStore())],
+      child: const CiudadAlertaApp(),
+    ));
+    await tester.tap(find.text('Explorar en modo demo (sin cuenta)'));
     await tester.pumpAndSettle(); // espera la "carga" del mock (600 ms)
 
     // 8 tarjetas = los 8 reportes del mock (prueba de completitud)

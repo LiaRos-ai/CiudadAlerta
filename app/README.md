@@ -8,28 +8,31 @@ release v0.1, tag `v0.4.0-dia5`), **refactorizada en el Día 6 para arrancar
 el Sprint 2** (arquitectura por capas con `ReportsRepository`, estado global
 con Riverpod y borradores locales con `shared_preferences`, **HU-07**),
 **conectada a su modelo de datos en el Día 7** (esquema ER y script SQL en
-`../db/` con test de contrato) y **conectada a la base de datos en el Día 8**:
-CRUD y consultas contra Supabase (HU-09, HU-10, HU-13) con **modo demo**
-(sin credenciales corre con el mock) y estadísticas con gráfico `fl_chart`.
+`../db/` con test de contrato), **conectada a la base de datos en el Día 8**
+(CRUD y consultas contra Supabase HU-09/HU-10/HU-13 con modo demo) y
+**autenticada en el Día 9**: registro e inicio de sesión con **Supabase Auth**
+(HU-08) con sesión persistente en almacen cifrado, **RLS por usuario**
+(`../db/rls_dia9.sql`) y **foto de evidencia** con permisos + Storage (HU-11).
 
 ## Cómo ejecutarla
 
 ```bash
 cd app
-fvm flutter pub get          # descarga dependencias (go_router, flutter_riverpod, shared_preferences, supabase_flutter, fl_chart)
-fvm flutter run              # MODO DEMO: elige el emulador AVD o tu celular por USB (CRUD en memoria)
+fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler)
+fvm flutter run              # MODO DEMO: registro local, login y CRUD en memoria
 
 # Contra tu proyecto Supabase del Día 7 (las claves NUNCA en el repo):
 fvm flutter run \
   --dart-define=SUPABASE_URL=https://TU-PROYECTO.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
 
-fvm flutter test             # suite completa: 31 pruebas verdes
+fvm flutter test             # suite completa: 53 pruebas verdes
 fvm flutter analyze          # sin advertencias antes de cada commit
 ```
 
-- **Flujo del Sprint 1**: Entrar → shell de 4 pestañas (Inicio · Mapa · Nuevo · Perfil)
-  → toca un reporte → detalle `/reporte/RPT-001` → pestaña Nuevo → formulario.
+- **Flujo del Sprint 1**: modo demo ("Explorar en modo demo") → shell de 4
+  pestañas (Inicio · Mapa · Nuevo · Perfil) → toca un reporte → detalle
+  `/reporte/RPT-001` → pestaña Nuevo → formulario.
 - **HU-06 (Día 5)**: cambia el modo oscuro del emulador (Ajustes → Pantalla →
   Tema oscuro); la app lo respeta sin tocar código (`themeMode: ThemeMode.system`).
 - **Arquitectura (Día 6)**: la lista ya no llama al mock — pide `reportesProvider`
@@ -46,6 +49,15 @@ fvm flutter analyze          # sin advertencias antes de cada commit
   editar y eliminar (HU-10, con CASCADE en comentarios/fotos); el icono de
   gráfico abre `/estadisticas` con las barras de HU-13 (GROUP BY). Sin
   credenciales el mismo flujo corre contra el mock (modo demo).
+- **Autenticación (Día 9 / HU-08)**: "Crear cuenta" registra con política de
+  contraseña (8+, mayúscula y número); Entrar autentica contra Supabase Auth;
+  cierra la app y vuelve: "Continuar como…" restaura la sesión (JWT en secure
+  storage). El perfil muestra el `auth.uid()` que las RLS comparan.
+- **Foto (Día 9 / HU-11)**: en Nuevo reporte, Cámara o Galería (con permisos);
+  la miniatura aparece en el formulario y en el detalle; el archivo vive en
+  Storage `fotos-reportes/{auth.uid()}/…` y el URL en `report_photos`.
+- **Seguridad (Día 9)**: ejecuta `../db/rls_dia9.sql` y sigue los casos
+  SP-01..SP-12 de `../docs/36-casos-prueba-seguridad.md` (evidencia del día).
 - **Pruebas alfa (Día 5)**: recorre los casos de `docs/17-casos-prueba-alfa.md`,
   ejecuta `fvm flutter analyze` (limpio) y `fvm flutter test` (31 pruebas verdes).
 - **Hot reload**: guarda el archivo (`Ctrl+S`) → la pantalla se actualiza sin recompilar.
@@ -61,31 +73,38 @@ app/
 │   ├── data/mock_reports.dart       ← datos simulados (modo demo del Día 8)
 │   ├── data/reports_repository.dart ← interfaz + mock con CRUD demo + provider de implementación
 │   ├── data/supabase_config.dart    ← Día 8: cliente Supabase + --dart-define (claves fuera del repo)
-│   ├── data/supabase_reports_repository.dart ← Día 8: CRUD y consultas (HU-09, HU-10, HU-13)
+│   ├── data/supabase_reports_repository.dart ← Día 8: CRUD y consultas; Día 9: auth.uid() + fotos
 │   ├── data/estadistica.dart        ← Día 8: agregados GROUP BY deterministas (HU-13)
+│   ├── data/auth_session.dart       ← Día 9: SessionUser + validadores + SessionStore (HU-08)
+│   ├── data/auth_repository.dart    ← Día 9: interfaz de auth + mock demo (HU-08)
+│   ├── data/supabase_auth_repository.dart ← Día 9: Supabase Auth real (signUp/signIn/signOut)
+│   ├── data/photo_storage.dart      ← Día 9: rutas de foto + validarImagen + Storage (HU-11)
 │   ├── data/draft_store.dart        ← Día 6 / HU-07: borradores con shared_preferences
 │   ├── providers/reports_provider.dart ← filtro, lista, detalle y estadísticas (AsyncValue)
 │   ├── theme/app_theme.dart         ← tema claro + oscuro HU-06 (Material 3, semilla #329B67)
 │   ├── widgets/custom_button.dart   ← botón reutilizable (hereda el tema)
-│   ├── widgets/custom_input.dart    ← campo de texto reutilizable
+│   ├── widgets/custom_input.dart    ← campo de texto reutilizable (Día 9: TextFormField con validator)
 │   ├── widgets/report_card.dart     ← tarjeta de reporte (la usa la lista HU-03)
 │   └── screens/
-│       ├── welcome_screen.dart      ← HU-01: bienvenida; Entrar navega a /inicio
+│       ├── welcome_screen.dart      ← HU-01 + HU-08 (Día 9): login real, registro y modo demo
+│       ├── register_screen.dart     ← Día 9 / HU-08: crear cuenta con política de contraseña
 │       ├── home_shell.dart          ← HU-02: NavigationBar con 4 pestañas
 │       ├── reports_list_screen.dart ← HU-03/HU-09: lista + chips de filtro + pull-to-refresh
 │       ├── report_detail_screen.dart← HU-04/HU-10: detalle + editar + eliminar
-│       ├── new_report_screen.dart   ← HU-05/HU-10: crear (INSERT) y editar (UPDATE) con borrador HU-07
+│       ├── new_report_screen.dart   ← HU-05/HU-10/HU-11: crear, editar y foto con permisos + Storage
 │       ├── stats_screen.dart        ← Día 8 / HU-13: estadísticas GROUP BY + BarChart (fl_chart)
 │       ├── map_placeholder_screen.dart ← pestaña Mapa (real en Sprint 3, HU-14)
-│       └── profile_screen.dart         ← pestaña Perfil (real con Auth, Día 9 HU-08)
-├── test/widget_test.dart          ← HU-01→HU-04: flujo de navegación y lista
+│       └── profile_screen.dart         ← Día 9 / HU-08: sesión, auth.uid() y cierre de sesión
+├── test/widget_test.dart          ← HU-01→HU-04: flujo con modo demo (4 pruebas, Día 9)
+├── test/auth_test.dart            ← Día 9 / HU-08: validadores, mock de auth y perfil (12 pruebas)
+├── test/photo_test.dart           ← Día 9 / HU-11: validarImagen, rutas y mock de Storage (9 pruebas)
 ├── test/form_validation_test.dart ← HU-05: validación (3 casos, envío async Día 8)
 ├── test/alfa_test.dart            ← Día 5: alfa (HU-06, conteo HU-03, borde HU-04)
 ├── test/draft_provider_test.dart  ← Día 6: borrador HU-07 + repositorio + provider (5 pruebas)
 ├── test/data_contract_test.dart   ← Día 7: contrato app ↔ BD (categorías, estados, RPT)
 ├── test/crud_demo_test.dart       ← Día 8: CRUD demo, filtro, agregados y mapeo JSON (12 pruebas)
 ├── test/stats_screen_test.dart    ← Día 8: gráfico y conteos de HU-13 (2 pruebas)
-├── pubspec.yaml                   ← dependencias (+ supabase_flutter, fl_chart), versión 0.7.0+1
+├── pubspec.yaml                   ← dependencias (+ secure_storage, image_picker, permission_handler), versión 0.8.0+1
 └── analysis_options.yaml          ← reglas de estilo (flutter_lints)
 ```
 
@@ -112,8 +131,9 @@ app/
    INSERT con botón bloqueado y SnackBar de confirmación.
 9. **Tema oscuro (HU-06)**: activa el modo oscuro del sistema; la app cambia
    sola. Los dos temas viven en `app_theme.dart` con la misma semilla.
-10. **Pruebas (Días 5-8)**: `fvm flutter test` deja 31 pruebas verdes; el
-   contrato app-BD y la demo de `docs/32` son la evidencia continua del Hito 2.
+10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 53 pruebas verdes; el
+   contrato app-BD y los casos SP-01..SP-12 de `docs/36` son la evidencia
+   continua del Hito 2.
 11. **Reto**: intenta pegar la clave anon directamente en `main.dart` y luego
    ejecuta `git log -p` en el cierre del día: el control de seguridad debe
    demostrar por qué eso está prohibido (rotar claves y usar `--dart-define`).
