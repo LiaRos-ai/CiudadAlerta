@@ -1,0 +1,14 @@
+# Día 10 / HU-12 - PLANTILLA de firma release (NO contiene secretos reales)
+#
+# 1. Genera TU keystore local (una sola vez):
+#      keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA \
+#              -keysize 2048 -validity 10000 -alias upload
+# 2. Copia este archivo como android/key.properties (está en .gitignore)
+#    y escribe tus contraseñas reales SOLO ahí.
+# 3. Guarda el keystore y este archivo fuera del repositorio (backup seguro):
+#    si pierdes el keystore, NO puedes actualizar la app publicada.
+#
+storePassword=CAMBIAME_EN_LOCAL
+keyPassword=CAMBIAME_EN_LOCAL
+keyAlias=upload
+storeFile=../upload-keystore.jks

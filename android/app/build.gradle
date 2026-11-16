@@ -1,0 +1,56 @@
+// Día 10 (HU-12): identidad y firma release de CiudadAlerta.
+// El applicationId es la identidad PERMANENTE de la app en Android:
+// cambiarlo después equivale a publicar otra app distinta en Play Store.
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+// El keystore vive FUERA del repositorio: key.properties es local y
+// key.properties.example documenta su forma (MASVS / seguridad del Día 9).
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.ciudadalerta.app"
+    compileSdk flutter.compileSdkVersion
+
+    defaultConfig {
+        // "bo.edu.mivar" NO: el curso estandariza com.ciudadalerta.app
+        applicationId "com.ciudadalerta.app"
+        // flutter_secure_storage (Keystore) exige API 23+
+        minSdkVersion 23
+        targetSdkVersion flutter.targetSdkVersion
+        // pubspec.yaml -> version: 0.9.0+1  =>  versionName 0.9.0 / versionCode 1
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            // Firma release: sin key.properties el build falla con un mensaje
+            // claro (mejor que publicar un APK sin firmar).
+            signingConfig signingConfigs.release
+            // R8 reduce y ofusca: el APK pasa de ~30 MB debug a ~9 MB release
+            minifyEnabled true
+            shrinkResources true
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
