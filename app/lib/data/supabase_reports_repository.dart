@@ -20,6 +20,16 @@
 //
 //   INSERT / UPDATE / DELETE
 //     -> .insert(map) / .update(map).eq(...) / .delete().eq(...)
+//
+// NOVEDAD Dia 9 (HU-08 + HU-11):
+//   - El autor del INSERT ya no es el perfil semilla del Dia 7: es
+//     auth.uid(), el usuario logueado por Supabase Auth. Asi la politica
+//     RLS "insertar solo mis reportes" (with check auth.uid() = usuario_id)
+//     acepta la fila; con otro uid, la BD la rechaza con error 403.
+//   - El select anidado agrega 'report_photos(url)': la evidencia llega
+//     embebida como el JOIN de categories, y el detalle (HU-11) muestra
+//     la miniatura sin una segunda consulta.
+//   - adjuntarFoto() INSERTa en report_photos tras subir a Storage.
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -37,14 +47,16 @@ class SupabaseReportsRepository implements ReportsRepository {
 
   /// HU-09: lista desde la BD con filtro por categoria y orden por fecha.
   ///
-  /// El select anidado 'categories(nombre)' trae el nombre de la categoria
-  /// por la FK categoria_id (el JOIN del Dia 7) sin copiar datos: 3FN.
+  /// El select anidado trae DOS joins por FK (Dia 8 + Dia 9):
+  ///   - categories(nombre): la etiqueta de la categoria (3FN)
+  ///   - report_photos(url): las evidencias del reporte (HU-11)
+  @override
   Future<List<Report>> obtenerReportes({String? categoria}) async {
     PostgrestFilterBuilder<List<Map<String, dynamic>>> consulta = _client
         .from('reports')
         .select(
             'id, codigo, titulo, descripcion, estado, zona, urgente, '
-            'creado_en, categories(nombre)')
+            'creado_en, categories(nombre), report_photos(url)')
         .order('creado_en', ascending: false);
 
     if (categoria != null && categoria != 'Todas') {
@@ -63,7 +75,7 @@ class SupabaseReportsRepository implements ReportsRepository {
         .from('reports')
         .select(
             'id, codigo, titulo, descripcion, estado, zona, urgente, '
-            'creado_en, categories(nombre)')
+            'creado_en, categories(nombre), report_photos(url)')
         .eq('codigo', id)
         .limit(1);
     if (filas.isEmpty) return null;
@@ -77,8 +89,9 @@ class SupabaseReportsRepository implements ReportsRepository {
   /// con una consulta al catalogo; (2) .select() detras del insert hace
   /// RETURNING: la fila vuelve con el id uuid, el codigo y el creado_en.
   ///
-  /// El autor es hoy el usuario semilla del Dia 7 (perfil demo); el Dia 9
-  /// (HU-08) auth.uid() lo sustituye por el usuario logueado.
+  /// NOVEDAD Dia 9 (HU-08): el autor es auth.uid() (el usuario logueado);
+  /// el perfil semilla queda SOLO como respaldo si la app corre sin sesion
+  /// (demo contra BD: casos de prueba SP-05/SP-06 en docs/36).
   static const String usuarioDemoId =
       '11111111-1111-1111-1111-111111111101'; // Rosa Quispe (seed.sql)
 
@@ -103,13 +116,18 @@ class SupabaseReportsRepository implements ReportsRepository {
           'zona': zona,
           'urgente': urgente,
           'estado': 'Recibido',
-          'usuario_id': usuarioDemoId,
+          // Dia 9: RLS exige auth.uid() = usuario_id; el seed es fallback
+          'usuario_id': _authUid ?? usuarioDemoId,
           'categoria_id': catalogo['id'],
         })
-        .select('*, categories(nombre)')
+        .select('*, categories(nombre), report_photos(url)')
         .single();
     return filaAReporte(fila);
   }
+
+  /// El id del usuario autenticado (auth.uid() en SQL).
+  /// null = sin sesion; la BD aplicara sus politicas igual (denegara).
+  String? get _authUid => _client.auth.currentUser?.id;
 
   /// HU-10: edita un reporte existente (UPDATE ... WHERE codigo = ...).
   Future<void> actualizarReporte(
@@ -133,8 +151,29 @@ class SupabaseReportsRepository implements ReportsRepository {
 
   /// HU-10: elimina un reporte (DELETE). Los comentarios y fotos se van
   /// por ON DELETE CASCADE (schema.sql del Dia 7): nadie queda huerfano.
+  @override
   Future<void> eliminarReporte(String codigo) async {
     await _client.from('reports').delete().eq('codigo', codigo);
+  }
+
+  /// Dia 9 (HU-11): registra la evidencia fotografica en report_photos.
+  ///
+  /// La tabla del Dia 7 referencia reports.id (uuid), pero la app navega
+  /// con el codigo legible (RPT-001): se resuelve con un SELECT puntual.
+  /// La politica RLS "insertar fotos de mis reportes" (db/rls_dia9.sql)
+  /// valida que el reporte sea del usuario; si no lo es, la BD rechaza.
+  @override
+  Future<void> adjuntarFoto(String codigo, String urlFoto) async {
+    final reporte = await _client
+        .from('reports')
+        .select('id')
+        .eq('codigo', codigo)
+        .limit(1)
+        .single();
+    await _client.from('report_photos').insert({
+      'reporte_id': reporte['id'],
+      'url': urlFoto,
+    });
   }
 
   /// HU-13: estadisticas por categoria (el C06 del Dia 7 desde la app).
@@ -171,6 +210,11 @@ class SupabaseReportsRepository implements ReportsRepository {
 
   /// Mapeo fila de la API -> modelo Report (estatico para poder probarlo
   /// sin red: la prueba del contrato de forma vive en test/).
+  ///
+  /// Dia 9 (HU-11): la evidencia llega embebida en report_photos (lista
+  /// por el JOIN); la miniatura usa la PRIMERA foto. Si no hay fotos, la
+  /// clave no existe o llega vacia: fotoUrl queda null y la UI no dibuja
+  /// la miniatura (mismo contrato que el Dia 7).
   static Report filaAReporte(Map<String, dynamic> fila) {
     return Report(
       id: (fila['codigo'] as String?) ?? (fila['id'] as String),
@@ -181,7 +225,19 @@ class SupabaseReportsRepository implements ReportsRepository {
       estado: fila['estado'] as String,
       zona: fila['zona'] as String,
       urgente: (fila['urgente'] as bool?) ?? false,
+      fotoUrl: _primeraFoto(fila),
     );
+  }
+
+  static String? _primeraFoto(Map<String, dynamic> fila) {
+    final fotos = fila['report_photos'];
+    if (fotos is List && fotos.isNotEmpty) {
+      final primera = fotos.first;
+      if (primera is Map && primera['url'] != null) {
+        return primera['url'] as String;
+      }
+    }
+    return null;
   }
 
   /// '2026-11-03T08:15:00-04:00' -> '03/11/2026 08:15'.

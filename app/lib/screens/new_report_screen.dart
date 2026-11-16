@@ -1,8 +1,11 @@
-// CiudadAlerta - Formulario de reporte: crear (HU-05) y editar (HU-10)
+// CiudadAlerta - Formulario de reporte: crear (HU-05), editar (HU-10)
+// y adjuntar la evidencia fotografica (HU-11, Dia 9)
 // HU-05: "Como ciudadano quiero llenar un formulario de nuevo reporte con
 // validación para evitar errores".
 // HU-07 (Día 6): "Como usuario quiero guardar borradores locales para no
 // perder lo escrito sin conexión" (solo en modo CREAR).
+// HU-11 (Día 9): "Como ciudadano quiero adjuntar una foto al reporte para
+// dar evidencia" - camara/galeria, sube a Storage, muestra miniatura.
 //
 // NOVEDAD Dia 8: el formulario GUARDA en la base de datos.
 //   - Modo crear (ruta /nuevo): valida y llama repo.crearReporte() -> INSERT.
@@ -17,15 +20,31 @@
 //     rechaza (constraint o RLS), el SnackBar lo muestra y el borrador
 //     sobrevive (HU-07).
 //
+// NOVEDAD Dia 9 (HU-11): el flujo de la foto es TRES pasos en cadena:
+//   1. ELEGIR: ImagePicker con permission_handler (camara pide su permiso;
+//      galeria usa el selector del sistema). Si el ciudadano niega, la app
+//      sigue funcionando SIN foto (el reporte nunca depende del permiso).
+//   2. VALIDAR: formato (jpg/png/webp) y peso (<= 5 MB) ANTES de subir.
+//   3. SUBIR tras el INSERT del reporte: Storage guarda el archivo en la
+//      carpeta del usuario (ruta determinista de photo_storage.dart) y
+//      adjuntarFoto() registra el URL en report_photos. Si la subida
+//      falla, el reporte YA ESTA guardado: se avisa, no se borra nada.
+//
 // Criterios HU-05 intactos: Form/TextFormField, mensajes claros y NO
 // envia si es invalido.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../data/draft_store.dart';
 import '../data/mock_reports.dart';
+import '../data/photo_storage.dart';
 import '../data/reports_repository.dart';
+import '../providers/auth_provider.dart';
 import '../providers/reports_provider.dart';
 import '../widgets/custom_button.dart';
 
@@ -47,6 +66,7 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
   String? _categoria;
   bool _guardando = false; // bloquea el boton durante el INSERT/UPDATE
   Report? _original; // reporte precargado en modo edicion
+  XFile? _foto; // HU-11: evidencia elegida (null = sin foto)
 
   bool get _modoEdicion => widget.codigo != null;
 
@@ -138,6 +158,51 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
       );
   }
 
+  // ------------------------------------------------------------------
+  // Dia 9 (HU-11): la foto
+  // ------------------------------------------------------------------
+
+  /// Paso 1: ELEGIR con ImagePicker + permisos (solo la camara pide
+  /// permiso runtime; la galeria en Android 13+ usa el selector del SO).
+  Future<void> _elegirFoto(ImageSource origen) async {
+    if (origen == ImageSource.camera) {
+      final estado = await Permission.camera.request();
+      if (!estado.isGranted) {
+        _mostrar(estado.isPermanentlyDenied
+            ? 'Permiso de cámara denegado. Actívalo en Ajustes > Aplicaciones.'
+            : 'Sin permiso de cámara: elige una foto de tu galería.');
+        return;
+      }
+    }
+    final foto = await ImagePicker().pickImage(
+      source: origen,
+      imageQuality: 70, // compresion: menos MB en el plan de datos
+      maxWidth: 1600,
+    );
+    if (foto == null) return; // el ciudadano cancelo: sin cambios
+    _validarYFijar(foto);
+  }
+
+  /// Paso 2: VALIDAR formato y peso ANTES de subir (fallar rapido).
+  Future<void> _validarYFijar(XFile foto) async {
+    final tamano = await foto.length();
+    final error = validarImagen(foto.name, tamanoBytes: tamano);
+    if (!mounted) return;
+    if (error != null) {
+      _mostrar(error);
+      return;
+    }
+    setState(() => _foto = foto);
+  }
+
+  void _quitarFoto() => setState(() => _foto = null);
+
+  void _mostrar(String mensaje) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(mensaje)));
+  }
+
   /// Dia 8: envio ASINCRONO a la base de datos (INSERT o UPDATE).
   Future<void> _enviar() async {
     // validate() ejecuta TODOS los validators y devuelve true si ninguno
@@ -151,6 +216,7 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
     final repo = ref.read(reportsRepositoryProvider);
     final messenger = ScaffoldMessenger.of(context);
     try {
+      Report? creado;
       if (_modoEdicion) {
         // HU-10: UPDATE ... WHERE codigo = X
         await repo.actualizarReporte(
@@ -161,7 +227,7 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
         ref.invalidate(reportePorIdProvider(_original!.id));
       } else {
         // HU-10: INSERT + RETURNING (la BD genera id, codigo y fecha)
-        await repo.crearReporte(
+        creado = await repo.crearReporte(
           titulo: _tituloCtrl.text.trim(),
           categoria: _categoria!,
           descripcion: _descripcionCtrl.text.trim(),
@@ -174,6 +240,37 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
           _categoria = null;
         });
       }
+
+      // Dia 9 (HU-11): PASO 3 de la foto, DESPUES del INSERT. Si falla la
+      // subida, el reporte ya vive: se avisa y no se borra nada.
+      if (!_modoEdicion && _foto != null && creado != null) {
+        try {
+          final sesion = await ref.read(authRepositoryProvider).sesionActual();
+          final uid = sesion?.id ?? 'invitado'; // la carpeta acota por usuario
+          final photoRepo = ref.read(photoRepositoryProvider);
+          final url = await photoRepo.subirFoto(
+            usuarioId: uid,
+            codigoReporte: creado.id,
+            rutaLocal: _foto!.path,
+          );
+          await repo.adjuntarFoto(creado.id, url);
+          ref.invalidate(reportePorIdProvider(creado.id));
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(const SnackBar(
+              content: Text('Foto subida a Storage y vinculada al reporte.'),
+              backgroundColor: Colors.green,
+            ));
+          _quitarFoto();
+        } catch (e) {
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(
+              content: Text('El reporte quedó guardado, pero la foto falló: $e'),
+            ));
+        }
+      }
+
       // La lista y las estadisticas dependen de la BD: se invalidan y las
       // pantallas que las escuchan se refrescan solas (reactividad Dia 6).
       ref.invalidate(reportesProvider);
@@ -279,6 +376,65 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
                 },
               ),
               const SizedBox(height: 20),
+
+              // ---- Dia 9 (HU-11): evidencia fotografica ----
+              if (!_modoEdicion) ...[
+                if (_foto != null)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12)),
+                          child: Image.file(
+                            File(_foto!.path),
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const SizedBox(
+                              height: 160,
+                              child: Center(child: Icon(Icons.broken_image_outlined)),
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.photo_outlined),
+                          title: Text('Miniatura lista: ${_foto!.name}',
+                              overflow: TextOverflow.ellipsis),
+                          subtitle: const Text(
+                              'Se sube a Storage junto con el reporte.'),
+                          trailing: IconButton(
+                            tooltip: 'Quitar foto',
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: _quitarFoto,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _elegirFoto(ImageSource.camera),
+                        icon: const Icon(Icons.photo_camera_outlined),
+                        label: const Text('Cámara'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _elegirFoto(ImageSource.gallery),
+                        icon: const Icon(Icons.photo_library_outlined),
+                        label: const Text('Galería'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // Dia 8: el boton se bloquea mientras corre el INSERT/UPDATE
               // (doble tap = dos INSERT: es el clasico bug de formularios async)

@@ -1,5 +1,6 @@
-// CiudadAlerta - Repositorio de reportes (Clase 6 -> 8)
-// Sprint 2 (Hito 2): arquitectura por capas y conexion a la BD.
+// CiudadAlerta - Repositorio de reportes (Clase 6 -> 9)
+// Sprint 2 (Hito 2): arquitectura por capas, conexion a la BD y ahora
+// la evidencia fotografica ligada a la sesion del ciudadano.
 //
 // Capas del curso:
 //   UI (screens/widgets)  ->  providers (Riverpod)  ->  repositorio  ->  datos
@@ -16,6 +17,9 @@
 //                                   el CRUD vive y muere con el proceso)
 //   SupabaseReportsRepository    -> la API REST autogenerada por Supabase
 //                                   (dia 7: schema.sql + seed.sql + RLS)
+//
+// Dia 9 (HU-11): adjuntarFoto() registra el URL de la evidencia en la
+// tabla report_photos y el detalle lo muestra como miniatura.
 //
 // El proveedor reportsRepositoryProvider decide cual usar segun existan
 // las variables --dart-define=SUPABASE_URL / SUPABASE_ANON_KEY.
@@ -59,6 +63,12 @@ abstract class ReportsRepository {
   });
 
   Future<void> eliminarReporte(String id);
+
+  /// Dia 9 (HU-11): registra la evidencia fotografica del reporte.
+  /// Recibe el URL publico que devuelve PhotoRepository.subirFoto(); en
+  /// Supabase INSERTa en report_photos y en el mock actualiza la lista
+  /// para que la miniatura del detalle aparezca al instante.
+  Future<void> adjuntarFoto(String id, String urlFoto);
 
   /// HU-13: agregados para la pantalla de estadisticas (GROUP BY).
   Future<List<EstadisticaCategoria>> estadisticasPorCategoria();
@@ -144,6 +154,27 @@ class MockReportsRepository implements ReportsRepository {
   Future<void> eliminarReporte(String id) async {
     await Future.delayed(const Duration(milliseconds: 400));
     _datos.removeWhere((r) => r.id == id);
+  }
+
+  @override
+  Future<void> adjuntarFoto(String id, String urlFoto) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final i = _datos.indexWhere((r) => r.id == id);
+    if (i == -1) {
+      throw StateError('No existe el reporte $id (modo demo)');
+    }
+    final viejo = _datos[i];
+    _datos[i] = Report(
+      id: viejo.id,
+      titulo: viejo.titulo,
+      categoria: viejo.categoria,
+      descripcion: viejo.descripcion,
+      fecha: viejo.fecha,
+      estado: viejo.estado,
+      zona: viejo.zona,
+      urgente: viejo.urgente,
+      fotoUrl: urlFoto, // HU-11: la miniatura ya tiene evidencia
+    );
   }
 
   @override

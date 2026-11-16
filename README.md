@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 2 · Día 8 — La app se conecta a la base de datos: CRUD, consultas y presentación**
+**Sprint 2 · Día 9 — Autenticación, seguridad de datos y recursos nativos**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -11,32 +11,37 @@ El docente actúa como **Product Owner** del Proyecto Guía y lo desarrolla en v
 cada equipo, en paralelo, aplica el mismo día lo aprendido en su **proyecto paralelo**.
 
 
-## Conexión a la BD del Sprint 2 (Clase 8 · Día 8)
+## Seguridad del Día 9 (Clase 9 · Día 9)
 
-Este snapshot corresponde al **tercer día del Hito 2**: tema *"Conexión de la
-app a la BD: CRUD, consultas y presentación de datos"*. La app del Día 6
-(capas + Riverpod + HU-07) habla hoy con la base de datos creada el Día 7:
-la evidencia oficial del día es la **Demo funcional de CRUD y consultas
-(lista de cotejo)**.
+Este snapshot corresponde al **cuarto día del Hito 2**: tema *"Autenticación,
+seguridad de datos y recursos nativos"*. La app del Día 8 (CRUD y consultas)
+hoy **sabe quién es el ciudadano** y la BD decide qué puede tocar: la evidencia
+oficial del día son los **Casos de prueba de seguridad SP-01..SP-12 (lista de
+cotejo)**.
 
 | Carpeta / archivo | Qué contiene |
 |---|---|
-| `app/lib/data/supabase_config.dart` | **Cliente de Supabase** con credenciales por `--dart-define` (nunca en el repo) y **modo demo** sin credenciales |
-| `app/lib/data/supabase_reports_repository.dart` | **CRUD y consultas contra PostgreSQL**: filtro/orden con select anidado (HU-09), insert/update/delete (HU-10), agregados (HU-13) |
-| `app/lib/data/estadistica.dart` | Modelos de **estadísticas** con agrupado determinista (el GROUP BY de HU-13, equivalente al C06 del Día 7) |
-| `app/lib/data/reports_repository.dart` | Interfaz + mock con CRUD demo + **provider que decide la implementación** (Supabase o demo) |
-| `app/lib/providers/reports_provider.dart` | Providers de filtro, lista, detalle y estadísticas (AsyncValue) |
-| `app/lib/screens/stats_screen.dart` | **Pantalla de estadísticas** con gráfico de barras `fl_chart` (HU-13) |
-| `app/test/` | Suite de **31 pruebas** (contrato app ↔ BD, CRUD demo, filtros, agregados, widgets y estadísticas) |
-| `docs/31-conexion-supabase.md` | Decisiones de conexión: cliente, variables de entorno, mapeo SQL→API, AsyncValue y seguridad |
-| `docs/32-demo-crud-consultas.md` | **Guion de la demo funcional** (evidencia oficial): pasos y criterios observables |
-| `docs/33-avance-git-dia8.md` | Guía de commits del Día 8 y etiqueta `v0.7.0-dia8` |
-| `docs/34-bitacora-dia8.md` | Bitácora del Día 8 con el registro de la demo y el control de claves |
+| `app/lib/data/auth_session.dart` | **SessionUser + validadores** (correo, contraseña 8+/mayúscula/número) y `SessionStore` (secure storage vs memoria) |
+| `app/lib/data/auth_repository.dart` | Interfaz de auth + **MockAuthRepository** (modo demo con sesión persistente simulada) |
+| `app/lib/data/supabase_auth_repository.dart` | **Supabase Auth real**: signUp/signIn/signOut, JWT y traducción de errores amigable |
+| `app/lib/providers/auth_provider.dart` | **Sesión como estado global** (`sesionActualProvider`) con Riverpod |
+| `app/lib/screens/register_screen.dart` | **Registro HU-08**: política de contraseña pedida dos veces, errores claros |
+| `app/lib/screens/welcome_screen.dart` | **Login real + acceso demo** + "Continuar como…" (sesión persistente) |
+| `app/lib/screens/profile_screen.dart` | **Perfil con sesión**: nombre, correo, `auth.uid()` y cierre de sesión |
+| `app/lib/data/photo_storage.dart` | **HU-11**: rutas `{uid}/{codigo}-{nombre-seguro}.ext`, `validarImagen`, mock/Storage |
+| `app/lib/screens/new_report_screen.dart` | **Foto en 3 pasos**: elegir (permisos) → validar → subir tras el INSERT |
+| `app/lib/screens/report_detail_screen.dart` | **Miniatura** de la evidencia (select anidado `report_photos(url)`) |
+| `db/rls_dia9.sql` | **RLS por usuario** (reports/comments/photos/profiles) + bucket `fotos-reportes` + verificación |
+| `app/test/` | Suite de **53 pruebas** (auth 12, foto 9, CRUD 12, borradores 5, widgets 4, contrato 3, alfa 3, formulario 3, stats 2) |
+| `docs/35-seguridad-auth-rls.md` | Decisiones: auth, JWT, RLS, Storage y OWASP MASVS básico |
+| `docs/36-casos-prueba-seguridad.md` | **Evidencia oficial**: SP-01..SP-12 con consultas de apoyo |
+| `docs/37-avance-git-dia9.md` | Guía de commits del Día 9 y etiqueta `v0.8.0-dia9` |
+| `docs/38-bitacora-dia9.md` | Bitácora del Día 9 con la prueba cruzada entre equipos |
 
 **Cómo correr la app hoy:**
 
 ```bash
-fvm flutter run   # modo DEMO (mock): CRUD en memoria, sin credenciales
+fvm flutter run   # modo DEMO: registro local, login y CRUD en memoria
 
 # contra tu proyecto Supabase del Día 7 (claves fuera del repo):
 fvm flutter run \
@@ -44,11 +49,11 @@ fvm flutter run \
   --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
 ```
 
-**Avance del producto**: tag `v0.7.0-dia8` (historial: `v0.0.0-sprint0` →
+**Avance del producto**: tag `v0.8.0-dia9` (historial: `v0.0.0-sprint0` →
 `v0.1.0-dia2` → `v0.2.0-dia3` → `v0.3.0-dia4` → `v0.4.0-dia5` → `v0.5.0-dia6` →
-`v0.6.0-dia7` → `v0.7.0-dia8`), `fvm flutter analyze` sin advertencias y
-`fvm flutter test` en verde (31 pruebas). Evidencia oficial del día:
-**Demo funcional de CRUD y consultas**.
+`v0.6.0-dia7` → `v0.7.0-dia8` → `v0.8.0-dia9`), `fvm flutter analyze` sin
+advertencias y `fvm flutter test` en verde (53 pruebas). Evidencia oficial del
+día: **Casos de prueba de seguridad (lista de cotejo)**.
 
 ### Camino del Sprint 2 (Hito 2)
 
@@ -57,7 +62,7 @@ fvm flutter run \
 | 6 ✅ | Arquitectura por capas, Riverpod y persistencia local | HU-07 |
 | 7 ✅ | Bases de datos: modelado ER, SQL y Supabase | esquema + seed |
 | 8 ✅ | CRUD, consultas y presentación de datos | HU-09, HU-10, HU-13 |
-| 9 | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
+| 9 ✅ | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
 | 10 | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
 
 ## Cierre del Sprint 1 (referencia · Día 5)
@@ -142,11 +147,15 @@ ciudadalerta/
 │   ├── 31-conexion-supabase.md
 │   ├── 32-demo-crud-consultas.md
 │   ├── 33-avance-git-dia8.md
-│   └── 34-bitacora-dia8.md
-├── db/                        ← SQL de Supabase: schema, seed y consultas (Día 7)
+│   ├── 34-bitacora-dia8.md
+│   ├── 35-seguridad-auth-rls.md
+│   ├── 36-casos-prueba-seguridad.md
+│   ├── 37-avance-git-dia9.md
+│   └── 38-bitacora-dia9.md
+├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7) y RLS + Storage (Día 9)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01..HU-10 y HU-13; conectada a Supabase desde el Día 8)
+└── app/                       ← código Flutter (HU-01..HU-11 y HU-13; auth + Storage desde el Día 9)
 ```
 
 ## Equipo y roles Scrum
