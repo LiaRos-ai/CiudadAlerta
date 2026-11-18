@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 3 · Día 11 — Sprint Planning 3: concepto de API, REST, JSON y consumo seguro**
+**Sprint 3 · Día 12 — APIs de Google: Maps Platform, claves y configuración**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -70,10 +70,29 @@ día: **Casos de prueba de seguridad (lista de cotejo)**.
 | Día | Tema | HU / API |
 |---|---|---|
 | 11 ✅ | Sprint Planning 3: API, REST, JSON y consumo seguro | clima Open-Meteo + cuadro de APIs (docs/46) |
-| 12 | APIs de Google: Maps Platform, claves y configuración | HU-14 |
+| 12 ✅ | APIs de Google: Maps Platform, claves y configuración | HU-14 mapa + claves restringidas (docs/51-52) |
 | 13 | Geolocalización, Geocoding y rutas | HU-15, HU-20 |
 | 14 | Voz y notificaciones (speech, TTS y push) | HU-16, HU-17, HU-19 |
 | 15 | Servicios de Amazon (AWS) y cierre del Sprint 3 | HU-18 + Informe 3 |
+
+## Mapa del Día 12 (Clase 12 · Día 12)
+
+El Día 12 convierte el placeholder del Día 4 en el **mapa real de los
+reportes (HU-14)** con Google Maps Platform. La pieza mantiene la
+arquitectura por capas: el modelo `Report` gana `latitud`/`longitud`
+opcionales (patrón del `fotoUrl` del Día 9), el repositorio Supabase las
+mapea con cast tolerante, `db/ubicaciones_dia12.sql` agrega las columnas
+y llena los 8 reportes del seed, y `lib/data/mapa/marcadores.dart`
+construye el `Set<Marker>` como lógica pura y probada. `MapaScreen` arma
+el `GoogleMap` con cámara inicial en La Paz (zoom 12) y aplica el criterio
+clave de la HU: la **ventana emergente del marcador navega al detalle**
+(`/reporte/:id` con go_router). La clave `MAPS_API_KEY` llega por
+`--dart-define`, Gradle la inyecta al AndroidManifest como placeholder y
+NUNCA se versiona; sin clave la pestaña muestra su panel de instrucciones
+(deterioro elegante). La evidencia oficial es el **Mapa funcional + claves
+restringidas** (docs/51 con el paso a paso de la consola y docs/52 con la
+guía técnica), junto al avance git (docs/53) y la bitácora (docs/54).
+Tag del día: `v1.1.0-dia12` (146 commits).
 
 ## APIs del Día 11 (Clase 11 · Día 11)
 
@@ -101,7 +120,7 @@ nativa generados desde `app/assets/icon/`, y los 3 permisos mínimos en el
 AndroidManifest. La firma release usa un keystore **local** (key.properties
 y *.jks están en `android/.gitignore`: MASVS — el keystore nunca entra al
 repo y se respalda fuera de él). El build verificable vive en
-`scripts/build_release.sh` (clean → pub get → analyze → 65 pruebas →
+`scripts/build_release.sh` (clean → pub get → analyze → 71 pruebas →
 `flutter build apk --release`) y la guía completa en `docs/39`. El cierre
 del sprint quedó documentado en el acta del Review 2 (`docs/40`), la
 retrospectiva con compromisos (`docs/41`) y la bitácora del refinamiento
@@ -133,7 +152,7 @@ Detalle completo en [`docs/01-product-vision-board.md`](docs/01-product-vision-b
 | Estado y arquitectura | Riverpod + arquitectura por capas |
 | UI | Material 3 |
 | Base de datos y backend | Supabase (PostgreSQL + Auth + Storage) |
-| APIs externas | Open-Meteo (clima) · Google Maps Platform · AWS (S3, Lambda, Rekognition) |
+| APIs externas | Google Maps Platform (mapa, Día 12) · Open-Meteo (clima) · AWS (S3, Lambda, Rekognition) |
 | Notificaciones y voz | Firebase Cloud Messaging · speech_to_text · flutter_tts |
 | Control de versiones y Scrum | GitHub (repositorio + Projects + Actions) |
 
@@ -205,14 +224,18 @@ ciudadalerta/
 │   ├── 47-api-rest-json.md
 │   ├── 48-servicio-clima-open-meteo.md
 │   ├── 49-avance-git-dia11.md
-│   └── 50-bitacora-dia11.md
+│   ├── 50-bitacora-dia11.md
+│   ├── 51-consola-google-cloud.md
+│   ├── 52-mapa-google-flutter.md
+│   ├── 53-avance-git-dia12.md
+│   └── 54-bitacora-dia12.md
 ├── api/                       ← colección Postman de la app y de Open-Meteo (Día 11)
-├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7) y RLS + Storage (Día 9)
+├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7), RLS + Storage (Día 9) y ubicaciones (Día 12)
 ├── android/                   ← build.gradle (applicationId + firma), AndroidManifest y key.properties.example (Día 10)
 ├── scripts/                   ← build_release.sh: build release verificable (Día 10)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01..HU-13 + clima del Día 11; APIs del Sprint 3)
+└── app/                       ← código Flutter (HU-01..HU-14 + clima del Día 11; APIs del Sprint 3)
 ```
 
 ## Equipo y roles Scrum

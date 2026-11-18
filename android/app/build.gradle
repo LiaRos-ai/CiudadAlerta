@@ -15,6 +15,18 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// Día 12 / HU-14: Flutter entrega los --dart-define codificados en
+// base64; se decodifican aquí para inyectar la clave de Google Maps
+// en el AndroidManifest vía placeholder ${mapsApiKey}. Así la clave
+// NUNCA se versiona (regla MASVS del curso; docs/51 y docs/52).
+def dartDefines = [:]
+if (project.hasProperty('dart-defines')) {
+    project.property('dart-defines').split(',').each { entry ->
+        def kv = new String(entry.decodeBase64(), 'UTF-8').split('=', 2)
+        dartDefines[kv[0]] = kv.length > 1 ? kv[1] : ''
+    }
+}
+
 android {
     namespace "com.ciudadalerta.app"
     compileSdk flutter.compileSdkVersion
@@ -28,6 +40,9 @@ android {
         // pubspec.yaml -> version: 0.9.0+1  =>  versionName 0.9.0 / versionCode 1
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        // Día 12: el valor llega por --dart-define en el build/run:
+        //   fvm flutter run --dart-define=MAPS_API_KEY=AIza...
+        manifestPlaceholders = [mapsApiKey: dartDefines['MAPS_API_KEY'] ?: '']
     }
 
     signingConfigs {

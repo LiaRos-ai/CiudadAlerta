@@ -226,6 +226,11 @@ class SupabaseReportsRepository implements ReportsRepository {
       zona: fila['zona'] as String,
       urgente: (fila['urgente'] as bool?) ?? false,
       fotoUrl: _primeraFoto(fila),
+      // Dia 12 (HU-14): coordenadas de la migracion db/ubicaciones_dia12.sql.
+      // Un reporte viejo sin ubicacion llega con null y el mapa lo excluye
+      // con elegancia (mismo criterio que fotoUrl en el Dia 9).
+      latitud: (fila['latitud'] as num?)?.toDouble(),
+      longitud: (fila['longitud'] as num?)?.toDouble(),
     );
   }
 

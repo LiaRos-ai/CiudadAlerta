@@ -31,6 +31,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Día 12 / HU-14: clave de Google Maps Platform. El VALOR no
+             vive aquí ni en el repositorio: build.gradle lo completa en
+             tiempo de build desde --dart-define (placeholder mapsApiKey).
+             Las restricciones (paquete + SHA-1) viven en la consola de
+             Google Cloud; el paso a paso está en docs/51. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${mapsApiKey}"/>
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>

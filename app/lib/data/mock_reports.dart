@@ -38,6 +38,8 @@ final List<Report> reportesMock = [
     fecha: '03/11/2026',
     estado: 'Recibido',
     zona: 'Miraflores, La Paz',
+    latitud: -16.4993,
+    longitud: -68.1190,
     urgente: true,
   ),
   const Report(
@@ -51,6 +53,8 @@ final List<Report> reportesMock = [
     fecha: '02/11/2026',
     estado: 'En revision',
     zona: 'San Pedro, La Paz',
+    latitud: -16.5009,
+    longitud: -68.1287,
   ),
   const Report(
     id: 'RPT-003',
@@ -62,6 +66,8 @@ final List<Report> reportesMock = [
     fecha: '01/11/2026',
     estado: 'En proceso',
     zona: 'Senkata, El Alto',
+    latitud: -16.4876,
+    longitud: -68.2075,
     urgente: true,
   ),
   const Report(
@@ -74,6 +80,8 @@ final List<Report> reportesMock = [
     fecha: '31/10/2026',
     estado: 'En proceso',
     zona: 'Calacoto, La Paz',
+    latitud: -16.5397,
+    longitud: -68.0927,
     urgente: true,
   ),
   const Report(
@@ -86,6 +94,8 @@ final List<Report> reportesMock = [
     fecha: '30/10/2026',
     estado: 'Recibido',
     zona: 'Villa Fatima, La Paz',
+    latitud: -16.4735,
+    longitud: -68.1113,
   ),
   const Report(
     id: 'RPT-006',
@@ -97,6 +107,8 @@ final List<Report> reportesMock = [
     fecha: '29/10/2026',
     estado: 'Resuelto',
     zona: 'Ceja, El Alto',
+    latitud: -16.5003,
+    longitud: -68.1526,
   ),
   const Report(
     id: 'RPT-007',
@@ -108,6 +120,8 @@ final List<Report> reportesMock = [
     fecha: '28/10/2026',
     estado: 'En revision',
     zona: 'El Prado, La Paz',
+    latitud: -16.5035,
+    longitud: -68.1341,
   ),
   const Report(
     id: 'RPT-008',
@@ -119,6 +133,8 @@ final List<Report> reportesMock = [
     fecha: '27/10/2026',
     estado: 'Recibido',
     zona: 'Sopocachi, La Paz',
+    latitud: -16.5129,
+    longitud: -68.1257,
   ),
 ];
 

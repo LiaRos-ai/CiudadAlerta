@@ -15,12 +15,15 @@ con Riverpod y borradores locales con `shared_preferences`, **HU-07**),
 (`../db/rls_dia9.sql`) y **foto de evidencia** con permisos + Storage (HU-11). En el **Día 11**
 arranca el Sprint 3 con la **primera API externa**: el clima de Open-Meteo
 (`lib/data/clima/`) consumido con `http` y mostrado en la lista de reportes.
+En el **Día 12** la pestaña Mapa se vuelve REAL: `google_maps_flutter` con
+marcadores de los reportes (`lib/data/mapa/`) y la clave de Google inyectada
+por build sin tocar el repositorio.
 
 ## Cómo ejecutarla
 
 ```bash
 cd app
-fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler, http)
+fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler, http, google_maps_flutter)
 fvm flutter run              # MODO DEMO: registro local, login y CRUD en memoria
 
 # Contra tu proyecto Supabase del Día 7 (las claves NUNCA en el repo):
@@ -28,7 +31,7 @@ fvm flutter run \
   --dart-define=SUPABASE_URL=https://TU-PROYECTO.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
 
-fvm flutter test             # suite completa: 65 pruebas verdes
+fvm flutter test             # suite completa: 71 pruebas verdes
 fvm flutter analyze          # sin advertencias antes de cada commit
 ```
 
@@ -86,6 +89,7 @@ app/
 │   ├── data/clima/clima.dart        ← Día 11: modelo Clima (fromJson de Open-Meteo)
 │   ├── data/clima/clima_visual.dart ← Día 11: códigos WMO → descripción, ícono y color
 │   ├── data/clima/weather_service.dart ← Día 11: cliente REST con timeout y errores amigables
+│   ├── data/mapa/marcadores.dart       ← Día 12: Report → Set<Marker> (lógica pura, HU-14)
 │   ├── providers/reports_provider.dart ← filtro, lista, detalle y estadísticas (AsyncValue)
 │   ├── providers/clima_provider.dart ← Día 11: FutureProvider del clima (deterioro elegante)
 │   ├── theme/app_theme.dart         ← tema claro + oscuro HU-06 (Material 3, semilla #329B67)
@@ -101,7 +105,7 @@ app/
 │       ├── report_detail_screen.dart← HU-04/HU-10: detalle + editar + eliminar
 │       ├── new_report_screen.dart   ← HU-05/HU-10/HU-11: crear, editar y foto con permisos + Storage
 │       ├── stats_screen.dart        ← Día 8 / HU-13: estadísticas GROUP BY + BarChart (fl_chart)
-│       ├── map_placeholder_screen.dart ← pestaña Mapa (real en Sprint 3, HU-14)
+│       ├── mapa_screen.dart           ← Día 12 / HU-14: GoogleMap, marcadores y InfoWindow al detalle
 │       └── profile_screen.dart         ← Día 9 / HU-08: sesión, auth.uid() y cierre de sesión
 ├── test/widget_test.dart          ← HU-01→HU-04: flujo con modo demo (4 pruebas, Día 9)
 ├── test/auth_test.dart            ← Día 9 / HU-08: validadores, mock de auth y perfil (12 pruebas)
@@ -113,7 +117,8 @@ app/
 ├── test/crud_demo_test.dart       ← Día 8: CRUD demo, filtro, agregados y mapeo JSON (12 pruebas)
 ├── test/stats_screen_test.dart    ← Día 8: gráfico y conteos de HU-13 (2 pruebas)
 ├── test/clima_test.dart           ← Día 11: modelo, servicio con MockClient y ApiConfig (6 pruebas)
-├── pubspec.yaml                   ← dependencias (+ http del Día 11), versión 1.0.0+2
+├── test/mapa_test.dart            ← Día 12: marcadores, coordenadas y panel sin clave (6 pruebas)
+├── pubspec.yaml                   ← dependencias (+ google_maps_flutter del Día 12), versión 1.1.0+3
 └── analysis_options.yaml          ← reglas de estilo (flutter_lints)
 ```
 
@@ -140,7 +145,7 @@ app/
    INSERT con botón bloqueado y SnackBar de confirmación.
 9. **Tema oscuro (HU-06)**: activa el modo oscuro del sistema; la app cambia
    sola. Los dos temas viven en `app_theme.dart` con la misma semilla.
-10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 65 pruebas verdes; el
+10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 71 pruebas verdes; el
    contrato app-BD y los casos SP-01..SP-12 de `docs/36` son la evidencia
    continua del Hito 2.
 11. **Reto**: intenta pegar la clave anon directamente en `main.dart` y luego
@@ -157,6 +162,13 @@ app/
    (toca para reintentar)" y la lista sigue funcionando — el deterioro
    elegante en acción. La colección Postman (`../api/`) documenta el
    endpoint exacto que consume `WeatherService`.
+
+14. **Mapa (Día 12)**: corre con la clave restringida del equipo:
+   `fvm flutter run --dart-define=MAPS_API_KEY=AIza...` y abre la pestaña
+   Mapa: 8 marcadores sobre La Paz y El Alto; toca un PIN y su ventana
+   emergente abre el detalle del reporte (HU-14). Sin clave verás el
+   panel con instrucciones — nunca un crash. El paso a paso de la
+   consola Google Cloud vive en `../docs/51`.
 
 ## Regla del curso
 

@@ -14,7 +14,7 @@
 //   /                 -> WelcomeScreen (HU-01; Dia 9: autentica HU-08)
 //   /registro         -> RegisterScreen (HU-08, Dia 9: crear cuenta)
 //   /inicio           -> ReportsListScreen   (pestaña 1, HU-03/HU-09)
-//   /mapa             -> MapPlaceholderScreen(pestaña 2, HU-14 en Sprint 3)
+//   /mapa             -> MapaScreen          (pestaña 2, HU-14 Dia 12)
 //   /nuevo            -> NewReportScreen     (pestaña 3, HU-05/HU-10/HU-11)
 //   /perfil           -> ProfileScreen       (pestaña 4; Dia 9: sesion real)
 //   /reporte/:id      -> ReportDetailScreen  (HU-04, fuera del shell)
@@ -25,7 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'screens/home_shell.dart';
-import 'screens/map_placeholder_screen.dart';
+import 'screens/mapa_screen.dart';
 import 'screens/new_report_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/register_screen.dart';
@@ -69,7 +69,7 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/mapa',
               name: 'mapa',
-              builder: (context, state) => const MapPlaceholderScreen(),
+              builder: (context, state) => const MapaScreen(),
             ),
           ],
         ),
