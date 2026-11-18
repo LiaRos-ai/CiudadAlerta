@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 2 · Día 9 — Autenticación, seguridad de datos y recursos nativos**
+**Sprint 3 · Día 11 — Sprint Planning 3: concepto de API, REST, JSON y consumo seguro**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -65,6 +65,32 @@ día: **Casos de prueba de seguridad (lista de cotejo)**.
 | 9 ✅ | Autenticación, seguridad (RLS) y recurso nativo | HU-08, HU-11 |
 | 10 ✅ | Distribuciones: APK release y cierre del sprint | HU-12 + Informe 2 |
 
+### Camino del Sprint 3 (Hito 3)
+
+| Día | Tema | HU / API |
+|---|---|---|
+| 11 ✅ | Sprint Planning 3: API, REST, JSON y consumo seguro | clima Open-Meteo + cuadro de APIs (docs/46) |
+| 12 | APIs de Google: Maps Platform, claves y configuración | HU-14 |
+| 13 | Geolocalización, Geocoding y rutas | HU-15, HU-20 |
+| 14 | Voz y notificaciones (speech, TTS y push) | HU-16, HU-17, HU-19 |
+| 15 | Servicios de Amazon (AWS) y cierre del Sprint 3 | HU-18 + Informe 3 |
+
+## APIs del Día 11 (Clase 11 · Día 11)
+
+El Sprint 3 (Hito 3) abre con la **primera API externa consumida por la
+app**: el clima de Open-Meteo (pública, sin API key) en la pantalla de
+reportes. La pieza sigue la arquitectura por capas: `ApiConfig`
+(`lib/data/api/`, claves por `--dart-define`, ninguna en el repo), modelo
+`Clima` con `fromJson` centralizado, `WeatherService` con cliente `http`
+inyectable, timeout de 8 s y errores HTTP traducidos a mensajes amigables
+(200/429/5xx), `climaActualProvider` (Riverpod) y `ClimaCard` con
+deterioro elegante (la lista NUNCA se bloquea; reintento al tocar). La
+colección Postman de la app y de la API vive en `api/postman_collection.json`;
+la evidencia oficial del día es el **Cuadro comparativo de APIs (Matriz 3)**
+(`docs/46`) junto al Sprint Backlog 3 (`docs/45`), la guía REST (`docs/47`),
+la guía técnica del clima (`docs/48`), el avance git (`docs/49`) y la
+bitácora (`docs/50`). Tag del día: `v1.0.0-dia11` (129 commits).
+
 ## Distribución del Día 10 (Clase 10 · Día 10)
 
 El Sprint 2 (Hito 2) cierra con el **APK release instalable (HU-12)** y el
@@ -75,7 +101,7 @@ nativa generados desde `app/assets/icon/`, y los 3 permisos mínimos en el
 AndroidManifest. La firma release usa un keystore **local** (key.properties
 y *.jks están en `android/.gitignore`: MASVS — el keystore nunca entra al
 repo y se respalda fuera de él). El build verificable vive en
-`scripts/build_release.sh` (clean → pub get → analyze → 59 pruebas →
+`scripts/build_release.sh` (clean → pub get → analyze → 65 pruebas →
 `flutter build apk --release`) y la guía completa en `docs/39`. El cierre
 del sprint quedó documentado en el acta del Review 2 (`docs/40`), la
 retrospectiva con compromisos (`docs/41`) y la bitácora del refinamiento
@@ -107,7 +133,7 @@ Detalle completo en [`docs/01-product-vision-board.md`](docs/01-product-vision-b
 | Estado y arquitectura | Riverpod + arquitectura por capas |
 | UI | Material 3 |
 | Base de datos y backend | Supabase (PostgreSQL + Auth + Storage) |
-| APIs externas | Google Maps Platform · AWS (S3, Lambda, Rekognition) |
+| APIs externas | Open-Meteo (clima) · Google Maps Platform · AWS (S3, Lambda, Rekognition) |
 | Notificaciones y voz | Firebase Cloud Messaging · speech_to_text · flutter_tts |
 | Control de versiones y Scrum | GitHub (repositorio + Projects + Actions) |
 
@@ -173,13 +199,20 @@ ciudadalerta/
 │   ├── 41-retrospectiva-2.md
 │   ├── 42-informe-2.md
 │   ├── 43-avance-git-dia10.md
-│   └── 44-bitacora-dia10.md
+│   ├── 44-bitacora-dia10.md
+│   ├── 45-sprint-backlog-3.md
+│   ├── 46-cuadro-comparativo-apis.md
+│   ├── 47-api-rest-json.md
+│   ├── 48-servicio-clima-open-meteo.md
+│   ├── 49-avance-git-dia11.md
+│   └── 50-bitacora-dia11.md
+├── api/                       ← colección Postman de la app y de Open-Meteo (Día 11)
 ├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7) y RLS + Storage (Día 9)
 ├── android/                   ← build.gradle (applicationId + firma), AndroidManifest y key.properties.example (Día 10)
 ├── scripts/                   ← build_release.sh: build release verificable (Día 10)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01..HU-13; auth + foto del Día 9, release del Día 10)
+└── app/                       ← código Flutter (HU-01..HU-13 + clima del Día 11; APIs del Sprint 3)
 ```
 
 ## Equipo y roles Scrum

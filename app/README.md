@@ -12,13 +12,15 @@ con Riverpod y borradores locales con `shared_preferences`, **HU-07**),
 (CRUD y consultas contra Supabase HU-09/HU-10/HU-13 con modo demo) y
 **autenticada en el Día 9**: registro e inicio de sesión con **Supabase Auth**
 (HU-08) con sesión persistente en almacen cifrado, **RLS por usuario**
-(`../db/rls_dia9.sql`) y **foto de evidencia** con permisos + Storage (HU-11).
+(`../db/rls_dia9.sql`) y **foto de evidencia** con permisos + Storage (HU-11). En el **Día 11**
+arranca el Sprint 3 con la **primera API externa**: el clima de Open-Meteo
+(`lib/data/clima/`) consumido con `http` y mostrado en la lista de reportes.
 
 ## Cómo ejecutarla
 
 ```bash
 cd app
-fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler)
+fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler, http)
 fvm flutter run              # MODO DEMO: registro local, login y CRUD en memoria
 
 # Contra tu proyecto Supabase del Día 7 (las claves NUNCA en el repo):
@@ -26,7 +28,7 @@ fvm flutter run \
   --dart-define=SUPABASE_URL=https://TU-PROYECTO.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
 
-fvm flutter test             # suite completa: 59 pruebas verdes
+fvm flutter test             # suite completa: 65 pruebas verdes
 fvm flutter analyze          # sin advertencias antes de cada commit
 ```
 
@@ -80,16 +82,22 @@ app/
 │   ├── data/supabase_auth_repository.dart ← Día 9: Supabase Auth real (signUp/signIn/signOut)
 │   ├── data/photo_storage.dart      ← Día 9: rutas de foto + validarImagen + Storage (HU-11)
 │   ├── data/draft_store.dart        ← Día 6 / HU-07: borradores con shared_preferences
+│   ├── data/api/api_config.dart     ← Día 11: ApiConfig (--dart-define) y sede del proyecto
+│   ├── data/clima/clima.dart        ← Día 11: modelo Clima (fromJson de Open-Meteo)
+│   ├── data/clima/clima_visual.dart ← Día 11: códigos WMO → descripción, ícono y color
+│   ├── data/clima/weather_service.dart ← Día 11: cliente REST con timeout y errores amigables
 │   ├── providers/reports_provider.dart ← filtro, lista, detalle y estadísticas (AsyncValue)
+│   ├── providers/clima_provider.dart ← Día 11: FutureProvider del clima (deterioro elegante)
 │   ├── theme/app_theme.dart         ← tema claro + oscuro HU-06 (Material 3, semilla #329B67)
 │   ├── widgets/custom_button.dart   ← botón reutilizable (hereda el tema)
 │   ├── widgets/custom_input.dart    ← campo de texto reutilizable (Día 9: TextFormField con validator)
 │   ├── widgets/report_card.dart     ← tarjeta de reporte (la usa la lista HU-03)
+│   ├── widgets/clima_card.dart      ← Día 11: tarjeta del clima (la lista nunca se bloquea)
 │   └── screens/
 │       ├── welcome_screen.dart      ← HU-01 + HU-08 (Día 9): login real, registro y modo demo
 │       ├── register_screen.dart     ← Día 9 / HU-08: crear cuenta con política de contraseña
 │       ├── home_shell.dart          ← HU-02: NavigationBar con 4 pestañas
-│       ├── reports_list_screen.dart ← HU-03/HU-09: lista + chips de filtro + pull-to-refresh
+│       ├── reports_list_screen.dart ← HU-03/HU-09 + clima Día 11: lista + chips + pull-to-refresh
 │       ├── report_detail_screen.dart← HU-04/HU-10: detalle + editar + eliminar
 │       ├── new_report_screen.dart   ← HU-05/HU-10/HU-11: crear, editar y foto con permisos + Storage
 │       ├── stats_screen.dart        ← Día 8 / HU-13: estadísticas GROUP BY + BarChart (fl_chart)
@@ -104,7 +112,8 @@ app/
 ├── test/data_contract_test.dart   ← Día 7: contrato app ↔ BD (categorías, estados, RPT)
 ├── test/crud_demo_test.dart       ← Día 8: CRUD demo, filtro, agregados y mapeo JSON (12 pruebas)
 ├── test/stats_screen_test.dart    ← Día 8: gráfico y conteos de HU-13 (2 pruebas)
-├── pubspec.yaml                   ← dependencias (+ secure_storage, image_picker, permission_handler), versión 0.8.0+1
+├── test/clima_test.dart           ← Día 11: modelo, servicio con MockClient y ApiConfig (6 pruebas)
+├── pubspec.yaml                   ← dependencias (+ http del Día 11), versión 1.0.0+2
 └── analysis_options.yaml          ← reglas de estilo (flutter_lints)
 ```
 
@@ -131,7 +140,7 @@ app/
    INSERT con botón bloqueado y SnackBar de confirmación.
 9. **Tema oscuro (HU-06)**: activa el modo oscuro del sistema; la app cambia
    sola. Los dos temas viven en `app_theme.dart` con la misma semilla.
-10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 59 pruebas verdes; el
+10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 65 pruebas verdes; el
    contrato app-BD y los casos SP-01..SP-12 de `docs/36` son la evidencia
    continua del Hito 2.
 11. **Reto**: intenta pegar la clave anon directamente en `main.dart` y luego
@@ -142,6 +151,12 @@ app/
    `app-release.apk` firmado (~9 MB, R8); instálalo con
    `adb install -r build/app/outputs/flutter-apk/app-release.apk` y verifica
    el ícono del pin, la splash nativa y la versión 0.9.0+1 en el Perfil.
+
+13. **Clima (Día 11)**: abre Inicio con red y la tarjeta muestra el clima
+   de La Paz (Open-Meteo, sin API key). Apaga el wifi: "Clima no disponible
+   (toca para reintentar)" y la lista sigue funcionando — el deterioro
+   elegante en acción. La colección Postman (`../api/`) documenta el
+   endpoint exacto que consume `WeatherService`.
 
 ## Regla del curso
 

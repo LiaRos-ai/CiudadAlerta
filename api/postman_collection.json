@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "CiudadAlerta · Sprint 3 · APIs (Día 11)",
+    "description": "Colección oficial del Día 11: primero Open-Meteo (API pública, sin clave) y luego los endpoints REST autogenerados de Supabase que la app consume desde el Día 8. Trabaja en Postman ANTES de tocar la app: la regla del día es explorar la API con el cliente visual y recién después en Dart.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "SUPABASE_URL",
+      "value": "https://TU-PROYECTO.supabase.co"
+    },
+    {
+      "key": "SUPABASE_ANON_KEY",
+      "value": "TU-CLAVE-ANON"
+    },
+    {
+      "key": "OPEN_METEO_URL",
+      "value": "https://api.open-meteo.com/v1/forecast"
+    }
+  ],
+  "item": [
+    {
+      "name": "Open-Meteo · clima actual La Paz (200)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{OPEN_METEO_URL}}?latitude=-16.4955&longitude=-68.1336&current=temperature_2m,weather_code,wind_speed_10m&timezone=America/La_Paz",
+          "host": ["{{OPEN_METEO_URL}}"],
+          "query": [
+            { "key": "latitude", "value": "-16.4955" },
+            { "key": "longitude", "value": "-68.1336" },
+            { "key": "current", "value": "temperature_2m,weather_code,wind_speed_10m" },
+            { "key": "timezone", "value": "America/La_Paz" }
+          ]
+        },
+        "description": "GET de la demo del Día 11. Sin API key. Observa la sección current en el JSON: es exactamente lo que Clima.fromJson() de la app espera."
+      }
+    },
+    {
+      "name": "Open-Meteo · misma consulta en la app (WeatherService)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{OPEN_METEO_URL}}?latitude=-16.4955&longitude=-68.1336&current=temperature_2m,weather_code,wind_speed_10m&timezone=America%2FLa_Paz",
+          "host": ["{{OPEN_METEO_URL}}"],
+          "query": [
+            { "key": "latitude", "value": "-16.4955" },
+            { "key": "longitude", "value": "-68.1336" },
+            { "key": "current", "value": "temperature_2m,weather_code,wind_speed_10m" },
+            { "key": "timezone", "value": "America/La_Paz" }
+          ]
+        },
+        "description": "La MISMA petición que arma WeatherService.construirUrl() en Dart. Si esta funciona en Postman y la tarjeta no, el error está en el código (y no en la API)."
+      }
+    },
+    {
+      "name": "Supabase · GET reportes (SELECT con filtro)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "apikey", "value": "{{SUPABASE_ANON_KEY}}" },
+          { "key": "Authorization", "value": "Bearer {{SUPABASE_ANON_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{SUPABASE_URL}}/rest/v1/reports?select=*&order=created_at.desc",
+          "host": ["{{SUPABASE_URL}}"],
+          "path": ["rest", "v1", "reports"],
+          "query": [
+            { "key": "select", "value": "*" },
+            { "key": "order", "value": "created_at.desc" }
+          ]
+        },
+        "description": "La consulta HU-09 vista por dentro: la librería supabase_flutter genera ESTE GET. Con RLS activa, un anon sin login solo ve lo que la política permite."
+      }
+    },
+    {
+      "name": "Supabase · POST reporte (INSERT)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "apikey", "value": "{{SUPABASE_ANON_KEY}}" },
+          { "key": "Authorization", "value": "Bearer {{SUPABASE_ANON_KEY}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Prefer", "value": "return=representation" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Reporte de prueba del Día 11\",\n  \"description\": \"Creado desde Postman para entender el REST debajo del SDK\",\n  \"category_id\": 2,\n  \"status_id\": 1,\n  \"latitude\": -16.4955,\n  \"longitude\": -68.1336\n}"
+        },
+        "url": {
+          "raw": "{{SUPABASE_URL}}/rest/v1/reports",
+          "host": ["{{SUPABASE_URL}}"],
+          "path": ["rest", "v1", "reports"]
+        },
+        "description": "El INSERT de HU-10 en crudo. Respuesta esperada: 201 Created con el fila nueva. Si RLS lo rechaza verás un 4xx con el mensaje de PostgREST: la seguridad del Día 9 al desnudo."
+      }
+    },
+    {
+      "name": "Supabase · PATCH reporte (UPDATE)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "apikey", "value": "{{SUPABASE_ANON_KEY}}" },
+          { "key": "Authorization", "value": "Bearer {{SUPABASE_ANON_KEY}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Reporte editado desde Postman (Día 11)\"\n}"
+        },
+        "url": {
+          "raw": "{{SUPABASE_URL}}/rest/v1/reports?code=eq.RPT-001",
+          "host": ["{{SUPABASE_URL}}"],
+          "path": ["rest", "v1", "reports"],
+          "query": [{ "key": "code", "value": "eq.RPT-001" }]
+        }
+      }
+    },
+    {
+      "name": "Supabase · DELETE reporte",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "apikey", "value": "{{SUPABASE_ANON_KEY}}" },
+          { "key": "Authorization", "value": "Bearer {{SUPABASE_ANON_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{SUPABASE_URL}}/rest/v1/reports?code=eq.RPT-TEST",
+          "host": ["{{SUPABASE_URL}}"],
+          "path": ["rest", "v1", "reports"],
+          "query": [{ "key": "code", "value": "eq.RPT-TEST" }]
+        },
+        "description": "DELETE con filtro. Practícalo sobre un reporte de prueba propio, nunca sobre el seed RPT-001..008 compartido."
+      }
+    }
+  ]
+}

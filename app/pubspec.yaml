@@ -1,7 +1,7 @@
 name: ciudadalerta
 description: "CiudadAlerta - Proyecto Guia de Aplicaciones Moviles I (SIS-0180). Arquitectura por capas con Riverpod (Clase 6), borradores locales (HU-07) y el flujo del Sprint 1 (HU-01..HU-06)."
 publish_to: 'none'
-version: 0.9.0+1
+version: 1.0.0+2
 
 environment:
   # Version congelada del curso (FVM). Ver docs/07-convenciones-git.md
@@ -26,6 +26,8 @@ dependencies:
   # Dia 9 / HU-11: recursos nativos - cámara y galería con sus permisos
   image_picker: ^1.1.2
   permission_handler: ^11.3.1
+  # Dia 11 / Sprint 3: cliente REST para APIs externas (clima Open-Meteo)
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:

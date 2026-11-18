@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 
 import '../data/mock_reports.dart';
 import '../providers/reports_provider.dart';
+import '../widgets/clima_card.dart';
 import '../widgets/report_card.dart';
 
 class ReportsListScreen extends ConsumerWidget {
@@ -63,6 +64,9 @@ class ReportsListScreen extends ConsumerWidget {
               ],
             ),
           ),
+          // Dia 11 / Sprint 3: primera API externa en la UI. El clima
+          // vive en la lista pero NUNCA la bloquea (deterioro elegante).
+          const ClimaCard(),
           Expanded(
             child: reportesAsync.when(
               // Estado 1: cargando (AsyncLoading del provider)
