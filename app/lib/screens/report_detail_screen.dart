@@ -18,13 +18,25 @@
 // NOVEDAD Dia 9 (HU-11): miniatura de la evidencia fotografica. El URL
 // llega embebido del select anidado report_photos(url); si el reporte no
 // tiene foto, la seccion no se dibuja (contrato del Dia 7 intacto).
+//
+// NOVEDAD Dia 13 (HU-15 + HU-20): la tarjeta UBICACIÓN y la ruta. Si el
+// reporte tiene coordenadas, el detalle muestra su dirección legible
+// (reverse geocoding del Día 13 con caché: abrir dos veces el mismo
+// reporte no repite la llamada) y el botón "Cómo llegar" abre la app de
+// Google Maps con la URL universal dir/?api=1 (costo cero). Sin
+// coordenadas, la sección no se dibuja (contrato intacto, como la foto).
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/report.dart';
 import '../data/reports_repository.dart';
+import '../data/ubicacion/geocoding_service.dart';
+import '../data/ubicacion/ruta.dart';
+import '../data/ubicacion/ubicacion_service.dart';
 import '../providers/reports_provider.dart';
 
 class ReportDetailScreen extends ConsumerWidget {
@@ -148,6 +160,7 @@ class _DetalleReporte extends StatelessWidget {
   const _DetalleReporte({required this.reporte});
 
   final Report reporte;
+  final _geocoding = GeocodingService(); // Día 13: caché del detalle
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +251,40 @@ class _DetalleReporte extends StatelessWidget {
             const SizedBox(height: 24),
           ],
 
+          // ---- Día 13 (HU-15): dirección legible del reporte ----
+          if (reporte.latitud != null && reporte.longitud != null) ...[
+            Text('Ubicación', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Card(
+              margin: EdgeInsets.zero,
+              child: ListTile(
+                leading: const Icon(Icons.location_on_outlined),
+                title: FutureBuilder<String?>(
+                  future: _geocoding.direccionDe(
+                    latitud: reporte.latitud!,
+                    longitud: reporte.longitud!,
+                  ),
+                  builder: (context, snapshot) {
+                    final direccion = snapshot.data;
+                    return Text(direccion ??
+                        '${reporte.latitud!.toStringAsFixed(5)}, '
+                            '${reporte.longitud!.toStringAsFixed(5)}');
+                  },
+                ),
+                subtitle: const Text(
+                    'Dirección legible del reporte (geocoding con caché)'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // ---- Día 13 (HU-20): la ruta hacia el reporte ----
+            OutlinedButton.icon(
+              onPressed: () => _abrirRuta(context, reporte),
+              icon: const Icon(Icons.directions_walk),
+              label: const Text('Cómo llegar'),
+            ),
+            const SizedBox(height: 24),
+          ],
+
           // Accion de seguimiento (el cambio de estado real llega en el
           // Hito 4 con el panel de moderación; hoy es demo visual)
           SizedBox(
@@ -251,6 +298,32 @@ class _DetalleReporte extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Día 13 (HU-20): abre la ruta hacia el reporte en la app de Google
+  /// Maps (costo cero). La posición actual es el origen; si no hay
+  /// ubicación propia, la URL solo lleva destino. launchUrl devuelve
+  /// false si no hay app/navegador: SnackBar, nunca un crash.
+  Future<void> _abrirRuta(BuildContext context, Report reporte) async {
+    Position? origen;
+    try {
+      origen = await const UbicacionService().posicionActual();
+    } catch (_) {
+      origen = null; // sin permiso o sin GPS: la ruta abre con destino
+    }
+    final url = Uri.parse(urlRuta(
+      destinoLat: reporte.latitud!,
+      destinoLng: reporte.longitud!,
+      origenLat: origen?.latitude,
+      origenLng: origen?.longitude,
+    ));
+    if (!context.mounted) return;
+    final abrio = await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (!abrio && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('No se encontró una app de mapas para abrir la ruta.'),
+      ));
+    }
   }
 
   /// HU-11: vista a pantalla completa de la evidencia (Dialog simple:

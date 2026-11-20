@@ -32,18 +32,28 @@
 //
 // Criterios HU-05 intactos: Form/TextFormField, mensajes claros y NO
 // envia si es invalido.
+//
+// NOVEDAD Dia 13 (HU-15): "usar mi ubicación". El botón pide el permiso
+// EN CONTEXTO, toma UNA lectura puntual (high, timeLimit 8 s) y la
+// vuelve legible con el geocoder del sistema. La dirección real pasa a
+// ser la zona del reporte y las coordenadas viajan al INSERT. Si algo
+// falla (GPS apagado, timeout, permiso negado), el formulario SIGUE:
+// el reporte nunca depende del permiso (misma regla que la foto HU-11).
 
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../data/draft_store.dart';
 import '../data/mock_reports.dart';
 import '../data/photo_storage.dart';
 import '../data/reports_repository.dart';
+import '../data/ubicacion/geocoding_service.dart';
+import '../data/ubicacion/ubicacion_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/reports_provider.dart';
 import '../widgets/custom_button.dart';
@@ -67,6 +77,14 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
   bool _guardando = false; // bloquea el boton durante el INSERT/UPDATE
   Report? _original; // reporte precargado en modo edicion
   XFile? _foto; // HU-11: evidencia elegida (null = sin foto)
+
+  // Dia 13 (HU-15): la ubicación del reporte (null = se envía sin ella)
+  final _ubicacion = const UbicacionService();
+  final _geocoding = GeocodingService();
+  double? _latitud;
+  double? _longitud;
+  String? _direccion;
+  bool _ubicando = false;
 
   bool get _modoEdicion => widget.codigo != null;
 
@@ -203,6 +221,51 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
       ..showSnackBar(SnackBar(content: Text(mensaje)));
   }
 
+  // ------------------------------------------------------------------
+  // Dia 13 (HU-15): la ubicación del reporte
+  // ------------------------------------------------------------------
+
+  /// Pide permiso EN CONTEXTO (al tocar "Usar mi ubicación"), toma UNA
+  /// lectura puntual y la vuelve legible con el geocoder del sistema.
+  /// Si algo falla, el formulario SIGUE: el reporte nunca depende del
+  /// permiso (misma regla que la foto del Día 9).
+  Future<void> _capturarUbicacion() async {
+    setState(() => _ubicando = true);
+    final posicion = await _ubicacion.posicionActual();
+    if (!mounted) return;
+    if (posicion == null) {
+      final bloqueado = await _ubicacion.denegadoParaSiempre();
+      if (!mounted) return;
+      _mostrar(mensajePermiso(true, bloqueado));
+      setState(() => _ubicando = false);
+      return;
+    }
+    // Reverse geocoding: coordenadas -> "Calle, Barrio, Ciudad".
+    // La dirección legible reemplaza al placeholder del Día 4.
+    final direccion = await _geocoding.direccionDe(
+      latitud: posicion.latitude,
+      longitud: posicion.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _latitud = posicion.latitude;
+      _longitud = posicion.longitude;
+      _direccion = direccion;
+      _ubicando = false;
+    });
+    _mostrar(direccion == null
+        ? 'Ubicación capturada (${posicion.latitude.toStringAsFixed(5)}, '
+            '${posicion.longitude.toStringAsFixed(5)})'
+        : 'Ubicación capturada: $direccion');
+  }
+
+  void _quitarUbicacion() =>
+      setState(() {
+        _latitud = null;
+        _longitud = null;
+        _direccion = null;
+      });
+
   /// Dia 8: envio ASINCRONO a la base de datos (INSERT o UPDATE).
   Future<void> _enviar() async {
     // validate() ejecuta TODOS los validators y devuelve true si ninguno
@@ -231,7 +294,11 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
           titulo: _tituloCtrl.text.trim(),
           categoria: _categoria!,
           descripcion: _descripcionCtrl.text.trim(),
-          zona: 'Zona del ciudadano (demo)',
+          // Dia 13 (HU-15): la dirección legible del geocoder es la zona
+          // real del reporte; sin ubicación queda el texto del Día 4.
+          zona: _direccion ?? 'Zona del ciudadano (demo)',
+          latitud: _latitud,
+          longitud: _longitud,
         );
         _borrador.limpiar(); // HU-07: enviado = dejar de ser borrador
         _tituloCtrl.clear();
@@ -376,6 +443,64 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
                 },
               ),
               const SizedBox(height: 20),
+
+              // ---- Dia 13 (HU-15): la ubicación del reporte ----
+              if (!_modoEdicion) ...[
+                Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              _latitud != null
+                                  ? Icons.location_on
+                                  : Icons.location_off_outlined,
+                              color: _latitud != null
+                                  ? Theme.of(context).colorScheme.primary
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _latitud != null
+                                    ? 'Ubicación capturada '
+                                        '(${_latitud!.toStringAsFixed(5)}, '
+                                        '${_longitud!.toStringAsFixed(5)})'
+                                    : _direccion ?? 'Sin ubicación: el '
+                                        'reporte se envía igual '
+                                        '(deterioro elegante)',
+                              ),
+                            ),
+                            if (_latitud != null)
+                              IconButton(
+                                tooltip: 'Quitar ubicación',
+                                icon: const Icon(Icons.close),
+                                onPressed: _quitarUbicacion,
+                              ),
+                          ],
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _ubicando ? null : _capturarUbicacion,
+                          icon: _ubicando
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                )
+                              : const Icon(Icons.my_location),
+                          label: const Text('Usar mi ubicación'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
 
               // ---- Dia 9 (HU-11): evidencia fotografica ----
               if (!_modoEdicion) ...[

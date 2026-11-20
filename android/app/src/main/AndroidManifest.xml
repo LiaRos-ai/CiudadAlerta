@@ -11,6 +11,14 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
 
+    <!-- Día 13 / HU-15: ubicación. FINE = GPS de precisión (punto azul y
+         coordenadas del reporte); COARSE = aproximada, la mínima que el
+         sistema exige junto a FINE. "always" NO se declara: la app no
+         rastrea en segundo plano (minimización de datos). El permiso
+         RUNTIME se pide en contexto con geolocator (docs/55). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
         android:label="CiudadAlerta"
         android:name="${applicationName}"

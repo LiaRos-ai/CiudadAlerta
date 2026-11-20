@@ -17,13 +17,17 @@ arranca el Sprint 3 con la **primera API externa**: el clima de Open-Meteo
 (`lib/data/clima/`) consumido con `http` y mostrado en la lista de reportes.
 En el **Día 12** la pestaña Mapa se vuelve REAL: `google_maps_flutter` con
 marcadores de los reportes (`lib/data/mapa/`) y la clave de Google inyectada
-por build sin tocar el repositorio.
+por build sin tocar el repositorio. En el **Día 13** el mapa se vuelve
+VIVO: `geolocator` trae la posición del ciudadano (punto azul y cámara,
+HU-15), `geocoding` la convierte en dirección legible con caché y
+`url_launcher` abre la ruta hacia el reporte (HU-20) — el permiso se pide
+en contexto y sin él el reporte se crea igual (deterioro elegante).
 
 ## Cómo ejecutarla
 
 ```bash
 cd app
-fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler, http, google_maps_flutter)
+fvm flutter pub get          # dependencias (go_router, riverpod, supabase_flutter, fl_chart, flutter_secure_storage, image_picker, permission_handler, http, google_maps_flutter, geolocator, geocoding, url_launcher)
 fvm flutter run              # MODO DEMO: registro local, login y CRUD en memoria
 
 # Contra tu proyecto Supabase del Día 7 (las claves NUNCA en el repo):
@@ -31,7 +35,7 @@ fvm flutter run \
   --dart-define=SUPABASE_URL=https://TU-PROYECTO.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=TU-CLAVE-ANON
 
-fvm flutter test             # suite completa: 71 pruebas verdes
+fvm flutter test             # suite completa: 77 pruebas verdes
 fvm flutter analyze          # sin advertencias antes de cada commit
 ```
 
@@ -90,6 +94,9 @@ app/
 │   ├── data/clima/clima_visual.dart ← Día 11: códigos WMO → descripción, ícono y color
 │   ├── data/clima/weather_service.dart ← Día 11: cliente REST con timeout y errores amigables
 │   ├── data/mapa/marcadores.dart       ← Día 12: Report → Set<Marker> (lógica pura, HU-14)
+│   ├── data/ubicacion/ubicacion_service.dart ← Día 13: permisos, lectura del GPS y distancia (HU-15)
+│   ├── data/ubicacion/geocoding_service.dart ← Día 13: dirección legible con caché y contador
+│   ├── data/ubicacion/ruta.dart        ← Día 13: URL de la ruta hacia el reporte (HU-20)
 │   ├── providers/reports_provider.dart ← filtro, lista, detalle y estadísticas (AsyncValue)
 │   ├── providers/clima_provider.dart ← Día 11: FutureProvider del clima (deterioro elegante)
 │   ├── theme/app_theme.dart         ← tema claro + oscuro HU-06 (Material 3, semilla #329B67)
@@ -102,10 +109,10 @@ app/
 │       ├── register_screen.dart     ← Día 9 / HU-08: crear cuenta con política de contraseña
 │       ├── home_shell.dart          ← HU-02: NavigationBar con 4 pestañas
 │       ├── reports_list_screen.dart ← HU-03/HU-09 + clima Día 11: lista + chips + pull-to-refresh
-│       ├── report_detail_screen.dart← HU-04/HU-10: detalle + editar + eliminar
-│       ├── new_report_screen.dart   ← HU-05/HU-10/HU-11: crear, editar y foto con permisos + Storage
+│       ├── report_detail_screen.dart← HU-04/HU-10/HU-15/HU-20: detalle + editar + eliminar + dirección y ruta
+│       ├── new_report_screen.dart   ← HU-05/HU-10/HU-11/HU-15: crear, editar, foto y ubicación con permisos
 │       ├── stats_screen.dart        ← Día 8 / HU-13: estadísticas GROUP BY + BarChart (fl_chart)
-│       ├── mapa_screen.dart           ← Día 12 / HU-14: GoogleMap, marcadores y InfoWindow al detalle
+│       ├── mapa_screen.dart           ← Día 12-13 / HU-14+HU-15: mapa vivo, punto azul y marcadores
 │       └── profile_screen.dart         ← Día 9 / HU-08: sesión, auth.uid() y cierre de sesión
 ├── test/widget_test.dart          ← HU-01→HU-04: flujo con modo demo (4 pruebas, Día 9)
 ├── test/auth_test.dart            ← Día 9 / HU-08: validadores, mock de auth y perfil (12 pruebas)
@@ -118,7 +125,8 @@ app/
 ├── test/stats_screen_test.dart    ← Día 8: gráfico y conteos de HU-13 (2 pruebas)
 ├── test/clima_test.dart           ← Día 11: modelo, servicio con MockClient y ApiConfig (6 pruebas)
 ├── test/mapa_test.dart            ← Día 12: marcadores, coordenadas y panel sin clave (6 pruebas)
-├── pubspec.yaml                   ← dependencias (+ google_maps_flutter del Día 12), versión 1.1.0+3
+├── test/ubicacion_test.dart       ← Día 13: distancia, dirección legible, caché y ruta (6 pruebas)
+├── pubspec.yaml                   ← dependencias (+ geolocator/geocoding/url_launcher del Día 13), versión 1.2.0+4
 └── analysis_options.yaml          ← reglas de estilo (flutter_lints)
 ```
 
@@ -145,7 +153,7 @@ app/
    INSERT con botón bloqueado y SnackBar de confirmación.
 9. **Tema oscuro (HU-06)**: activa el modo oscuro del sistema; la app cambia
    sola. Los dos temas viven en `app_theme.dart` con la misma semilla.
-10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 71 pruebas verdes; el
+10. **Pruebas (Días 5-9)**: `fvm flutter test` deja 77 pruebas verdes; el
    contrato app-BD y los casos SP-01..SP-12 de `docs/36` son la evidencia
    continua del Hito 2.
 11. **Reto**: intenta pegar la clave anon directamente en `main.dart` y luego
@@ -169,6 +177,14 @@ app/
    emergente abre el detalle del reporte (HU-14). Sin clave verás el
    panel con instrucciones — nunca un crash. El paso a paso de la
    consola Google Cloud vive en `../docs/51`.
+
+15. **Ubicación y ruta (Día 13)**: en el DISPOSITIVO físico, toca el FAB
+   "Mi ubicación" del mapa: concede el permiso, el punto azul aparece y
+   la cámara se centra en ti (HU-15). En Nuevo reporte usa "usar mi
+   ubicación": el reporte guarda coordenadas y su zona es una dirección
+   legible. Abre el detalle: dirección con caché y botón "Cómo llegar"
+   (HU-20, abre Google Maps). Sin permiso todo sigue funcionando; la
+   guía de permisos y privacidad vive en `../docs/55`.
 
 ## Regla del curso
 

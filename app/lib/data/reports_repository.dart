@@ -45,12 +45,16 @@ abstract class ReportsRepository {
 
   /// HU-10: crea, edita y elimina (CRUD). Crear devuelve el Report con
   /// sus datos finales (id/codigo/fecha generados).
+  /// Dia 13 (HU-15): latitud/longitud opcionales del GPS del ciudadano;
+  /// null = reporte sin ubicación (el contrato de los Días 7-12 intacto).
   Future<Report> crearReporte({
     required String titulo,
     required String categoria,
     required String descripcion,
     required String zona,
     bool urgente = false,
+    double? latitud,
+    double? longitud,
   });
 
   Future<void> actualizarReporte(
@@ -118,6 +122,8 @@ class MockReportsRepository implements ReportsRepository {
       estado: 'Recibido',
       zona: zona,
       urgente: urgente,
+      latitud: latitud,   // Dia 13 (HU-15): el modo demo también guarda
+      longitud: longitud, // las coordenadas del GPS
     );
     _datos.insert(0, nuevo);
     return nuevo;
@@ -147,6 +153,11 @@ class MockReportsRepository implements ReportsRepository {
       estado: estado ?? viejo.estado,
       zona: zona ?? viejo.zona,
       urgente: urgente ?? viejo.urgente,
+      // Dia 13: TODO campo opcional debe sobrevivir a la reconstrucción
+      // del mock (fotoUrl del Día 9 y coordenadas del Día 13).
+      fotoUrl: viejo.fotoUrl,
+      latitud: viejo.latitud,
+      longitud: viejo.longitud,
     );
   }
 
@@ -174,6 +185,8 @@ class MockReportsRepository implements ReportsRepository {
       zona: viejo.zona,
       urgente: viejo.urgente,
       fotoUrl: urlFoto, // HU-11: la miniatura ya tiene evidencia
+      latitud: viejo.latitud,   // Dia 13: las coordenadas sobreviven
+      longitud: viejo.longitud, // a la reconstrucción del mock
     );
   }
 

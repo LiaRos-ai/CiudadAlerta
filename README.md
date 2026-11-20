@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 3 · Día 12 — APIs de Google: Maps Platform, claves y configuración**
+**Sprint 3 · Día 13 — Geolocalización, Geocoding y rutas**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -71,9 +71,32 @@ día: **Casos de prueba de seguridad (lista de cotejo)**.
 |---|---|---|
 | 11 ✅ | Sprint Planning 3: API, REST, JSON y consumo seguro | clima Open-Meteo + cuadro de APIs (docs/46) |
 | 12 ✅ | APIs de Google: Maps Platform, claves y configuración | HU-14 mapa + claves restringidas (docs/51-52) |
-| 13 | Geolocalización, Geocoding y rutas | HU-15, HU-20 |
+| 13 ✅ | Geolocalización, Geocoding y rutas | HU-15/HU-20 demo en dispositivo (docs/55-56) |
 | 14 | Voz y notificaciones (speech, TTS y push) | HU-16, HU-17, HU-19 |
 | 15 | Servicios de Amazon (AWS) y cierre del Sprint 3 | HU-18 + Informe 3 |
+
+## Ubicación del Día 13 (Clase 13 · Día 13)
+
+El Día 13 vuelve el mapa **vivo** con las HU-15 y HU-20. La pieza
+mantiene la arquitectura por capas y las reglas del curso: el permiso
+se pide **en contexto** (al tocar "Usar mi ubicación", nunca al abrir
+la app) y `deniedForever` abre Ajustes sin crash; `geolocator` da UNA
+lectura puntual (`high`, `timeLimit` 8 s) y el punto azul
+(`myLocationEnabled`) solo se enciende tras conceder; el geocoding
+inverso con el **Geocoder del sistema** (sin costo por solicitud)
+convierte las coordenadas en **dirección legible** con una **caché por
+clave redondeada a 5 decimales** y un contador que MIDE las llamadas
+(insumo del Informe 3); el formulario guarda coordenadas y la zona real
+en el INSERT (mock y Supabase con los mismos parámetros opcionales); y
+la ruta hacia el reporte (HU-20) se abre con **url_launcher** sobre la
+URL universal `dir/?api=1` de Google Maps — costo cero — con SnackBar
+si no hay app de mapas. El día dejó además la incidencia estrella en la
+bitácora: los select explícitos de Supabase no pedían `latitud/longitud`
+(con el mock funcionaba) — el `fix:` del Día 13 demuestra por qué la
+demo en dispositivo contra la BD real está en la Definition of Done.
+La evidencia oficial es la **demo en dispositivo físico** (docs/55 con
+permisos y privacidad, docs/56 con geocoding y rutas, docs/57 avance
+git y docs/58 bitácora). Tag del día: `v1.2.0-dia13` (163 commits).
 
 ## Mapa del Día 12 (Clase 12 · Día 12)
 
@@ -120,7 +143,7 @@ nativa generados desde `app/assets/icon/`, y los 3 permisos mínimos en el
 AndroidManifest. La firma release usa un keystore **local** (key.properties
 y *.jks están en `android/.gitignore`: MASVS — el keystore nunca entra al
 repo y se respalda fuera de él). El build verificable vive en
-`scripts/build_release.sh` (clean → pub get → analyze → 71 pruebas →
+`scripts/build_release.sh` (clean → pub get → analyze → 77 pruebas →
 `flutter build apk --release`) y la guía completa en `docs/39`. El cierre
 del sprint quedó documentado en el acta del Review 2 (`docs/40`), la
 retrospectiva con compromisos (`docs/41`) y la bitácora del refinamiento
@@ -152,7 +175,7 @@ Detalle completo en [`docs/01-product-vision-board.md`](docs/01-product-vision-b
 | Estado y arquitectura | Riverpod + arquitectura por capas |
 | UI | Material 3 |
 | Base de datos y backend | Supabase (PostgreSQL + Auth + Storage) |
-| APIs externas | Google Maps Platform (mapa, Día 12) · Open-Meteo (clima) · AWS (S3, Lambda, Rekognition) |
+| APIs externas | Google Maps Platform (mapa Día 12 · ubicación y rutas Día 13) · Open-Meteo (clima) · AWS (S3, Lambda, Rekognition) |
 | Notificaciones y voz | Firebase Cloud Messaging · speech_to_text · flutter_tts |
 | Control de versiones y Scrum | GitHub (repositorio + Projects + Actions) |
 
@@ -228,14 +251,18 @@ ciudadalerta/
 │   ├── 51-consola-google-cloud.md
 │   ├── 52-mapa-google-flutter.md
 │   ├── 53-avance-git-dia12.md
-│   └── 54-bitacora-dia12.md
+│   ├── 54-bitacora-dia12.md
+│   ├── 55-permisos-y-ubicacion.md
+│   ├── 56-geocoding-y-rutas.md
+│   ├── 57-avance-git-dia13.md
+│   └── 58-bitacora-dia13.md
 ├── api/                       ← colección Postman de la app y de Open-Meteo (Día 11)
 ├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7), RLS + Storage (Día 9) y ubicaciones (Día 12)
 ├── android/                   ← build.gradle (applicationId + firma), AndroidManifest y key.properties.example (Día 10)
 ├── scripts/                   ← build_release.sh: build release verificable (Día 10)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01..HU-14 + clima del Día 11; APIs del Sprint 3)
+└── app/                       ← código Flutter (HU-01..HU-15 y HU-20 + clima y mapa; APIs del Sprint 3)
 ```
 
 ## Equipo y roles Scrum

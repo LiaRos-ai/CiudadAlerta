@@ -56,7 +56,8 @@ class SupabaseReportsRepository implements ReportsRepository {
         .from('reports')
         .select(
             'id, codigo, titulo, descripcion, estado, zona, urgente, '
-            'creado_en, categories(nombre), report_photos(url)')
+            'creado_en, latitud, longitud, '
+            'categories(nombre), report_photos(url)')
         .order('creado_en', ascending: false);
 
     if (categoria != null && categoria != 'Todas') {
@@ -75,7 +76,8 @@ class SupabaseReportsRepository implements ReportsRepository {
         .from('reports')
         .select(
             'id, codigo, titulo, descripcion, estado, zona, urgente, '
-            'creado_en, categories(nombre), report_photos(url)')
+            'creado_en, latitud, longitud, '
+            'categories(nombre), report_photos(url)')
         .eq('codigo', id)
         .limit(1);
     if (filas.isEmpty) return null;
@@ -101,6 +103,8 @@ class SupabaseReportsRepository implements ReportsRepository {
     required String descripcion,
     required String zona,
     bool urgente = false,
+    double? latitud,
+    double? longitud,
   }) async {
     final catalogo = await _client
         .from('categories')
@@ -119,6 +123,11 @@ class SupabaseReportsRepository implements ReportsRepository {
           // Dia 9: RLS exige auth.uid() = usuario_id; el seed es fallback
           'usuario_id': _authUid ?? usuarioDemoId,
           'categoria_id': catalogo['id'],
+          // Dia 13 (HU-15): coordenadas del GPS del ciudadano. Las
+          // columnas son opcionales (migración del Día 12): si no hay
+          // ubicación, las claves no viajan y el reporte se crea igual.
+          if (latitud != null) 'latitud': latitud,
+          if (longitud != null) 'longitud': longitud,
         })
         .select('*, categories(nombre), report_photos(url)')
         .single();
