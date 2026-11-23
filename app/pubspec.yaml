@@ -35,7 +35,7 @@ dependencies:
   geocoding: ^3.0.0
   url_launcher: ^6.3.0
   # Dia 14 / HU-16: reconocimiento de voz (motor del sistema, en contexto)
-  speech_to_text: ^6.6.2
+  speech_to_text: ^7.4.0
   # Dia 14 / HU-19: texto a voz (accesibilidad, costo cero on-device)
   flutter_tts: ^4.0.2
   # Dia 14 / HU-17: notificaciones locales (aviso de estado en el dispositivo)

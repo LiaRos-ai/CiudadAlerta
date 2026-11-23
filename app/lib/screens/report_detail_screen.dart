@@ -160,10 +160,11 @@ class ReportDetailScreen extends ConsumerWidget {
 }
 
 class _DetalleReporte extends StatelessWidget {
-  const _DetalleReporte({required this.reporte});
+  _DetalleReporte({required this.reporte})
+      : _geocoding = GeocodingService();
 
   final Report reporte;
-  final _geocoding = GeocodingService(); // Día 13: caché del detalle
+  final GeocodingService _geocoding; // Día 13: caché del detalle
 
   @override
   Widget build(BuildContext context) {

@@ -32,7 +32,9 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
-            child: usuario == null ? _invitado(theme) : _conSesion(theme, ref, usuario),
+            child: usuario == null
+                ? _invitado(context, theme)
+                : _conSesion(context, theme, ref, usuario),
           ),
         ),
       ),
@@ -40,7 +42,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   // --- Sin sesion (estado inicial o tras cerrar sesion) -------------------
-  Widget _invitado(ThemeData theme) {
+  Widget _invitado(BuildContext context, ThemeData theme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -69,7 +71,8 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   // --- Con sesion (HU-08 completa) ----------------------------------------
-  Widget _conSesion(ThemeData theme, WidgetRef ref, usuario) {
+  Widget _conSesion(
+      BuildContext context, ThemeData theme, WidgetRef ref, usuario) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

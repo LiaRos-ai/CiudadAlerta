@@ -31,10 +31,10 @@ ClimaVisual visualDeClima(Clima clima) {
   return switch (c) {
     0 => const ClimaVisual('Despejado', Icons.wb_sunny, Color(0xFFF5A623)),
     1 || 2 => const ClimaVisual(
-        'Parcialmente nublado', Icons.partly_cloudy_day, Color(0xFF56CACA)),
+        'Parcialmente nublado', Icons.cloud_queue, Color(0xFF56CACA)),
     3 => const ClimaVisual('Nublado', Icons.wb_cloudy, Color(0xFF7D8782)),
     45 || 48 =>
-      const ClimaVisual('Niebla', Icons.foggy, Color(0xFF9FB4A7)),
+      const ClimaVisual('Niebla', Icons.blur_on, Color(0xFF9FB4A7)),
     >= 51 && <= 57 => const ClimaVisual(
         'Llovizna', Icons.grain, Color(0xFF4A90D9)),
     >= 61 && <= 67 =>

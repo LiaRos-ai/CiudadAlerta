@@ -51,6 +51,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../data/draft_store.dart';
 import '../data/mock_reports.dart';
 import '../data/photo_storage.dart';
+import '../data/report.dart';
 import '../data/reports_repository.dart';
 import '../data/ubicacion/geocoding_service.dart';
 import '../data/ubicacion/ubicacion_service.dart';
@@ -137,13 +138,16 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
                   Text('No existe el reporte "${widget.codigo}" para editar.')));
         return;
       }
-      setState(() {
-        _original = reporte;
-        _tituloCtrl.text = reporte.titulo;
-        _descripcionCtrl.text = reporte.descripcion;
-        _categoria = reporte.categoria;
-        _restaurando = false;
-      });
+      final cargado = reporte;
+      if (cargado != null) {
+        setState(() {
+          _original = cargado;
+          _tituloCtrl.text = cargado.titulo;
+          _descripcionCtrl.text = cargado.descripcion;
+          _categoria = cargado.categoria;
+          _restaurando = false;
+        });
+      }
     });
   }
 

@@ -24,15 +24,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'screens/home_shell.dart';
-import 'screens/mapa_screen.dart';
-import 'screens/new_report_screen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/register_screen.dart';
-import 'screens/report_detail_screen.dart';
-import 'screens/reports_list_screen.dart';
-import 'screens/stats_screen.dart';
-import 'screens/welcome_screen.dart';
+import '../screens/home_shell.dart';
+import '../screens/mapa_screen.dart';
+import '../screens/new_report_screen.dart';
+import '../screens/profile_screen.dart';
+import '../screens/register_screen.dart';
+import '../screens/report_detail_screen.dart';
+import '../screens/reports_list_screen.dart';
+import '../screens/stats_screen.dart';
+import '../screens/welcome_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',

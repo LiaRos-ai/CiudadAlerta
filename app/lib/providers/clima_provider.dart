@@ -21,7 +21,7 @@ import '../data/clima/weather_service.dart';
 final weatherServiceProvider = Provider<WeatherService>((ref) {
   return WeatherService(
     client: http.Client(),
-    config: const ApiConfig.fromEnvironment(),
+    config: ApiConfig.fromEnvironment(),
   );
 });
 

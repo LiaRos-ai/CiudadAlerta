@@ -22,7 +22,7 @@ class ApiConfig {
   /// configurada: el mapa muestra su pantalla de espera, no un crash.
   final String? mapsApiKey;
 
-  const ApiConfig.fromEnvironment()
+  ApiConfig.fromEnvironment()
       : openMeteoUrl = String.fromEnvironment(
           'OPEN_METEO_URL',
           defaultValue: 'https://api.open-meteo.com/v1/forecast',

@@ -30,7 +30,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../api/api_config.dart';
+import '../data/api/api_config.dart';
 import '../data/mapa/marcadores.dart';
 import '../data/ubicacion/ubicacion_service.dart';
 import '../providers/reports_provider.dart';
@@ -96,7 +96,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
 
     // PRIMERO la clave (no se toca reportesProvider: en modo demo el
     // panel no debe disparar ninguna consulta a Supabase).
-    final clave = const ApiConfig.fromEnvironment().mapsApiKey;
+    final clave = ApiConfig.fromEnvironment().mapsApiKey;
     if (clave == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Mapa')),

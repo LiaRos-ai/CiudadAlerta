@@ -46,7 +46,7 @@ class WeatherService {
     ApiConfig? config,
     this.timeout = const Duration(seconds: 8),
   })  : _client = client ?? http.Client(),
-        _config = config ?? const ApiConfig.fromEnvironment();
+        _config = config ?? ApiConfig.fromEnvironment();
 
   /// La petición GET que probamos ANTES en Postman (Paso B del lab):
   /// query params por URL, sin cuerpo. La URL es reproducible: el mismo

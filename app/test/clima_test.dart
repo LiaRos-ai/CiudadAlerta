@@ -93,7 +93,7 @@ void main() {
   group('ApiConfig: claves fuera del repositorio', () {
     test('sin --dart-define no hay claves y la URL pública es Open-Meteo',
         () {
-      const config = ApiConfig.fromEnvironment();
+      final config = ApiConfig.fromEnvironment();
       expect(config.mapsApiKey, isNull,
           reason: 'Ninguna clave puede existir sin --dart-define');
       expect(config.openMeteoUrl, startsWith('https://api.open-meteo.com'));

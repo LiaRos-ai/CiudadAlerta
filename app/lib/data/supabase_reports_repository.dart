@@ -52,17 +52,14 @@ class SupabaseReportsRepository implements ReportsRepository {
   ///   - report_photos(url): las evidencias del reporte (HU-11)
   @override
   Future<List<Report>> obtenerReportes({String? categoria}) async {
-    PostgrestFilterBuilder<List<Map<String, dynamic>>> consulta = _client
-        .from('reports')
-        .select(
-            'id, codigo, titulo, descripcion, estado, zona, urgente, '
-            'creado_en, latitud, longitud, '
-            'categories(nombre), report_photos(url)')
-        .order('creado_en', ascending: false);
-
-    if (categoria != null && categoria != 'Todas') {
-      consulta = consulta.eq('categories.nombre', categoria);
-    }
+    final base = _client.from('reports').select(
+        'id, codigo, titulo, descripcion, estado, zona, urgente, '
+        'creado_en, latitud, longitud, '
+        'categories(nombre), report_photos(url)');
+    final consulta = categoria != null && categoria != 'Todas'
+        ? base.eq('categories.nombre', categoria).order('creado_en',
+            ascending: false)
+        : base.order('creado_en', ascending: false);
 
     final filas = await consulta;
     return [for (final fila in filas) filaAReporte(fila)];

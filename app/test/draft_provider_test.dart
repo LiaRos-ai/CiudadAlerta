@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ciudadalerta/data/draft_store.dart';
 import 'package:ciudadalerta/data/mock_reports.dart';
+import 'package:ciudadalerta/data/report.dart';
 import 'package:ciudadalerta/data/reports_repository.dart';
 import 'package:ciudadalerta/providers/reports_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

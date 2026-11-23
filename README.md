@@ -77,6 +77,8 @@ día: **Casos de prueba de seguridad (lista de cotejo)**.
 
 ## Voz y avisos del Día 14 (Clase 14 · Día 14)
 
+Guía detallada de ejecución y evidencia: [`docs/63-guia-ejecucion-dia14.md`](docs/63-guia-ejecucion-dia14.md).
+
 El Día 14 le pone **voz y avisos** a la app con las HU-16, HU-17 y
 HU-19. El dictado (HU-16) entra al formulario con `speech_to_text` y
 el motor del sistema: el permiso `RECORD_AUDIO` se pide **en contexto**

@@ -50,10 +50,12 @@ void main() {
         descripcion: 'Reporte actualizado con mas detalle del tramo oscuro.',
       );
 
-      final editado = repo.buscarPorId('RPT-002')!;
-      expect(editado.titulo, contains('tercera vez'));
-      expect(editado.descripcion, contains('tramo oscuro'));
-      expect(editado.categoria, 'Luminaria'); // la FK no cambia en la edicion
+      final editado = await repo.buscarPorId('RPT-002');
+      expect(editado, isNotNull);
+      final reporteEditado = editado!;
+      expect(reporteEditado.titulo, contains('tercera vez'));
+      expect(reporteEditado.descripcion, contains('tramo oscuro'));
+      expect(reporteEditado.categoria, 'Luminaria'); // la FK no cambia en la edicion
     });
 
     test('eliminarReporte quita el reporte y deja los demas intactos',
@@ -145,7 +147,7 @@ void main() {
       expect(porNombre['Luminaria'], 0);
       expect(porNombre['Residuos'], 0);
       expect(porNombre['Riesgo'], 0);
-      expect(porNombre.first.categoria, 'Via'); // la mayor va primero
+      expect(porNombre.entries.first.key, 'Via'); // la mayor va primero
     });
   });
 
