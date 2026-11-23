@@ -41,7 +41,11 @@ abstract class ReportsRepository {
 
   /// Busqueda puntual por id/codigo. Devuelve null si no existe: la UI
   /// decide como mostrar ese caso (HU-04).
-  Report? buscarPorId(String id);
+  /// FIX Día 14: el contrato pasa a Future. La interfaz del Día 6 lo
+  /// declaró sincrónico porque el mock lo era; la implementación de
+  /// Supabase (Día 8) devolvía Future y el contrato quedó A MEDIAS:
+  /// dos implementaciones con tipos incompatibles no compilan juntas.
+  Future<Report?> buscarPorId(String id);
 
   /// HU-10: crea, edita y elimina (CRUD). Crear devuelve el Report con
   /// sus datos finales (id/codigo/fecha generados).
@@ -101,7 +105,7 @@ class MockReportsRepository implements ReportsRepository {
   }
 
   @override
-  Report? buscarPorId(String id) => buscarReportePorId(id);
+  Future<Report?> buscarPorId(String id) async => buscarReportePorId(id);
 
   @override
   Future<Report> crearReporte({
@@ -110,6 +114,12 @@ class MockReportsRepository implements ReportsRepository {
     required String descripcion,
     required String zona,
     bool urgente = false,
+    // FIX Día 14: el cuerpo de esta firma YA usaba latitud/longitud
+    // (el Día 13 añadió la referencia sin añadir el parámetro): con el
+    // mock el reporte del modo demo nunca compiló. El contrato se
+    // homologa: mismos parámetros opcionales en mock y Supabase.
+    double? latitud,
+    double? longitud,
   }) async {
     await Future.delayed(const Duration(milliseconds: 600));
     final numero = _datos.length + 1;

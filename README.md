@@ -1,6 +1,6 @@
 # CiudadAlerta — Proyecto Guía · Aplicaciones Móviles I (SIS-0180)
 
-**Sprint 3 · Día 13 — Geolocalización, Geocoding y rutas**
+**Sprint 3 · Día 14 — Voz y notificaciones: reconocimiento de voz, texto a voz y push**
 
 CiudadAlerta es la app móvil del Proyecto Guía de la asignatura **Aplicaciones Móviles I**
 (Ingeniería de Sistemas · Octavo semestre). Permite a los ciudadanos de **La Paz y El Alto**
@@ -72,8 +72,35 @@ día: **Casos de prueba de seguridad (lista de cotejo)**.
 | 11 ✅ | Sprint Planning 3: API, REST, JSON y consumo seguro | clima Open-Meteo + cuadro de APIs (docs/46) |
 | 12 ✅ | APIs de Google: Maps Platform, claves y configuración | HU-14 mapa + claves restringidas (docs/51-52) |
 | 13 ✅ | Geolocalización, Geocoding y rutas | HU-15/HU-20 demo en dispositivo (docs/55-56) |
-| 14 | Voz y notificaciones (speech, TTS y push) | HU-16, HU-17, HU-19 |
+| 14 ✅ | Voz y notificaciones (speech, TTS y push) | HU-16/HU-17/HU-19 demo de voz y avisos (docs/59-60) |
 | 15 | Servicios de Amazon (AWS) y cierre del Sprint 3 | HU-18 + Informe 3 |
+
+## Voz y avisos del Día 14 (Clase 14 · Día 14)
+
+El Día 14 le pone **voz y avisos** a la app con las HU-16, HU-17 y
+HU-19. El dictado (HU-16) entra al formulario con `speech_to_text` y
+el motor del sistema: el permiso `RECORD_AUDIO` se pide **en contexto**
+(al tocar el micrófono del campo, nunca al abrir la app) y el texto
+aparece EN VIVO con los resultados parciales; sin permiso o sin motor,
+el teclado sigue (el dictado mejora el reporte, jamás lo bloquea). El
+detalle **escucha** (HU-19): `flutter_tts` lee codigo, título, estado,
+zona y descripción con el mejor español instalado y se silencia al
+salir — accesibilidad real sobre los Semantics del Día 4. Y el botón
+placeholder "Avisarme cuando cambie el estado" se vuelve HU-17: un tap
+pide POST_NOTIFICATIONS (Android 13+), UPSERTa el token FCM en
+`push_tokens` (RLS por usuario) y muestra el aviso EXACTO que la Edge
+Function enviará — el trigger `trg_estado_cambio` deja el cambio en
+`avisos_pendientes` y docs/60 documenta la ruta completa (Firebase ->
+token -> trigger -> Edge Function con service_role en secretos). Sin
+google-services.json el push no existe, pero la app NO crashea: el
+aviso LOCAL demuestra el mismo payload (deterioro elegante). El día
+dejó además la **incidencia heredada** en la bitácora: la firma del
+mock no aceptaba las coordenadas que su cuerpo ya usaba y
+`buscarPorId` quedó a medias entre sync (Día 6) y async (Día 8) — el
+`fix:` del Día 14 homologa el contrato con los tests actualizados. La
+evidencia oficial es la **demo de voz / notificaciones** con la prueba
+cruzada entre equipos (docs/59 voz, docs/60 notificaciones, docs/61
+avance git y docs/62 bitácora). Tag del día: `v1.3.0-dia14` (180 commits).
 
 ## Ubicación del Día 13 (Clase 13 · Día 13)
 
@@ -143,7 +170,7 @@ nativa generados desde `app/assets/icon/`, y los 3 permisos mínimos en el
 AndroidManifest. La firma release usa un keystore **local** (key.properties
 y *.jks están en `android/.gitignore`: MASVS — el keystore nunca entra al
 repo y se respalda fuera de él). El build verificable vive en
-`scripts/build_release.sh` (clean → pub get → analyze → 77 pruebas →
+`scripts/build_release.sh` (clean → pub get → analyze → 83 pruebas →
 `flutter build apk --release`) y la guía completa en `docs/39`. El cierre
 del sprint quedó documentado en el acta del Review 2 (`docs/40`), la
 retrospectiva con compromisos (`docs/41`) y la bitácora del refinamiento
@@ -175,7 +202,7 @@ Detalle completo en [`docs/01-product-vision-board.md`](docs/01-product-vision-b
 | Estado y arquitectura | Riverpod + arquitectura por capas |
 | UI | Material 3 |
 | Base de datos y backend | Supabase (PostgreSQL + Auth + Storage) |
-| APIs externas | Google Maps Platform (mapa Día 12 · ubicación y rutas Día 13) · Open-Meteo (clima) · AWS (S3, Lambda, Rekognition) |
+| APIs externas | Google Maps Platform (mapa Día 12 · ubicación y rutas Día 13) · Open-Meteo (clima) · Firebase Cloud Messaging (push, Día 14) · AWS (S3, Lambda, Rekognition) |
 | Notificaciones y voz | Firebase Cloud Messaging · speech_to_text · flutter_tts |
 | Control de versiones y Scrum | GitHub (repositorio + Projects + Actions) |
 
@@ -255,14 +282,18 @@ ciudadalerta/
 │   ├── 55-permisos-y-ubicacion.md
 │   ├── 56-geocoding-y-rutas.md
 │   ├── 57-avance-git-dia13.md
-│   └── 58-bitacora-dia13.md
+│   ├── 58-bitacora-dia13.md
+│   ├── 59-voz-y-notificaciones.md
+│   ├── 60-notificaciones-push-fcm.md
+│   ├── 61-avance-git-dia14.md
+│   └── 62-bitacora-dia14.md
 ├── api/                       ← colección Postman de la app y de Open-Meteo (Día 11)
 ├── db/                        ← SQL de Supabase: schema, seed, consultas (Día 7), RLS + Storage (Día 9) y ubicaciones (Día 12)
 ├── android/                   ← build.gradle (applicationId + firma), AndroidManifest y key.properties.example (Día 10)
 ├── scripts/                   ← build_release.sh: build release verificable (Día 10)
 ├── matriz_decision/           ← plantilla de matriz de decisión (Día 2)
 ├── wireframes/                ← plantilla de wireframes (Día 2)
-└── app/                       ← código Flutter (HU-01..HU-15 y HU-20 + clima y mapa; APIs del Sprint 3)
+└── app/                       ← código Flutter (HU-01..HU-17 y HU-19-20 + clima, mapa y voz; APIs del Sprint 3)
 ```
 
 ## Equipo y roles Scrum

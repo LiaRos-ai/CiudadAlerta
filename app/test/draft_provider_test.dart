@@ -78,12 +78,12 @@ void main() {
       expect(reportes.length, 8);
       expect(reportes.first.id, 'RPT-001');
 
-      final encontrado = repo.buscarPorId('RPT-001');
+      final encontrado = await repo.buscarPorId('RPT-001');
       expect(encontrado, isNotNull);
       expect(encontrado!.titulo, contains('Bache'));
 
       // Contrato null-safe: id inexistente devuelve null (HU-04)
-      expect(repo.buscarPorId('RPT-999'), isNull);
+      expect(await repo.buscarPorId('RPT-999'), isNull);
     });
 
     testWidgets('reportesProvider expone los datos via AsyncValue',

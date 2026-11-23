@@ -54,6 +54,7 @@ import '../data/photo_storage.dart';
 import '../data/reports_repository.dart';
 import '../data/ubicacion/geocoding_service.dart';
 import '../data/ubicacion/ubicacion_service.dart';
+import '../data/voz/voz_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/reports_provider.dart';
 import '../widgets/custom_button.dart';
@@ -85,6 +86,10 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
   double? _longitud;
   String? _direccion;
   bool _ubicando = false;
+
+  // Dia 14 (HU-16): dictado por voz de la descripción
+  final _voz = VozService();
+  bool _dictando = false; // el chip de escucha es un ESTADO, como el punto azul
 
   bool get _modoEdicion => widget.codigo != null;
 
@@ -266,6 +271,35 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
         _direccion = null;
       });
 
+  // ------------------------------------------------------------------
+  // Dia 14 (HU-16): dictado por voz de la descripción
+  // ------------------------------------------------------------------
+
+  /// Primer tap arranca el dictado EN CONTEXTO (el permiso de micrófono
+  /// se pide JUSTO aquí, no al abrir la app); segundo tap detiene. Los
+  /// resultados PARCIALES del motor van actualizando el campo mientras
+  /// el ciudadano habla; la transcripción limpia reemplaza el contenido
+  /// y el borrador HU-07 sigue persistiendo cada cambio.
+  Future<void> _dictarDescripcion() async {
+    if (_dictando) {
+      await _voz.detener();
+      if (mounted) setState(() => _dictando = false);
+      return;
+    }
+    final mensaje = await _voz.dictar(
+      alTexto: (texto) {
+        if (mounted) setState(() => _descripcionCtrl.text = texto);
+      },
+    );
+    if (!mounted) return;
+    if (mensaje != null) {
+      _mostrar(mensaje); // sin permiso o sin motor: el teclado sigue
+      return;
+    }
+    setState(() => _dictando = true);
+    _mostrar('Dictando... toca el micrófono de nuevo para detener.');
+  }
+
   /// Dia 8: envio ASINCRONO a la base de datos (INSERT o UPDATE).
   Future<void> _enviar() async {
     // validate() ejecuta TODOS los validators y devuelve true si ninguno
@@ -424,14 +458,28 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ---- Descripcion ----
+              // ---- Descripcion (Día 14 / HU-16: con dictado por voz) ----
               TextFormField(
                 controller: _descripcionCtrl,
                 maxLines: 4,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Descripción del problema',
                   hintText: '¿Qué pasa, dónde exactamente y desde cuándo?',
                   alignLabelWithHint: true,
+                  // HU-16: el dictado se activa DESDE el campo (contexto).
+                  // El permiso RECORD_AUDIO se pide en el primer tap.
+                  suffixIcon: IconButton(
+                    tooltip: _dictando
+                        ? 'Detener dictado'
+                        : 'Dictar descripción por voz',
+                    icon: Icon(
+                      _dictando ? Icons.mic : Icons.mic_none,
+                      color: _dictando
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+                    onPressed: _dictarDescripcion,
+                  ),
                 ),
                 textInputAction: TextInputAction.done,
                 validator: (value) {
@@ -442,6 +490,25 @@ class _NewReportScreenState extends ConsumerState<NewReportScreen> {
                   return null;
                 },
               ),
+              // Día 14 (HU-16): la escucha es un ESTADO visible; el texto
+              // suficiente se valida con la misma regla de 10 caracteres.
+              if (_dictando)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.graphic_eq, size: 16),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Escuchando... habla con claridad; el texto '
+                          'aparece en vivo en el campo.',
+                          style: TextStyle(fontSize: 12.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               const SizedBox(height: 20),
 
               // ---- Dia 13 (HU-15): la ubicación del reporte ----

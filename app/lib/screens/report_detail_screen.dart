@@ -37,6 +37,9 @@ import '../data/reports_repository.dart';
 import '../data/ubicacion/geocoding_service.dart';
 import '../data/ubicacion/ruta.dart';
 import '../data/ubicacion/ubicacion_service.dart';
+import '../data/notificaciones/aviso_estado.dart';
+import '../data/notificaciones/notificaciones_service.dart';
+import '../data/voz/voz_service.dart';
 import '../providers/reports_provider.dart';
 
 class ReportDetailScreen extends ConsumerWidget {
@@ -214,6 +217,10 @@ class _DetalleReporte extends StatelessWidget {
           Text('Descripción', style: theme.textTheme.titleMedium),
           const SizedBox(height: 6),
           Text(reporte.descripcion, style: theme.textTheme.bodyMedium),
+          // Día 14 (HU-19): accesibilidad REAL. TalkBack ya lee la UI
+          // con los Semantics del Día 4; este botón agrega el otro
+          // lado: el ciudadano ESCUCHA el contenido del reporte.
+          _BotonEscuchar(reporte: reporte),
           const SizedBox(height: 24),
 
           // ---- Dia 9 (HU-11): miniatura de la evidencia fotografica ----
@@ -285,16 +292,12 @@ class _DetalleReporte extends StatelessWidget {
             const SizedBox(height: 24),
           ],
 
-          // Accion de seguimiento (el cambio de estado real llega en el
-          // Hito 4 con el panel de moderación; hoy es demo visual)
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.notifications_outlined),
-              label: const Text('Avisarme cuando cambie el estado'),
-            ),
-          ),
+          // Día 14 (HU-17): activar los avisos de estado. El cambio
+          // REAL llega del trigger de la BD -> Edge Function -> FCM
+          // (docs/60); sin Firebase configurado, la app demuestra el
+          // MISMO aviso en local (deterioro elegante) y guarda el
+          // token si FCM responde.
+          _BotonAvisos(reporte: reporte),
         ],
       ),
     );
@@ -336,6 +339,140 @@ class _DetalleReporte extends StatelessWidget {
           maxScale: 4,
           child: Image.network(url, fit: BoxFit.contain),
         ),
+      ),
+    );
+  }
+}
+
+/// Día 14 (HU-19): botón "Escuchar" con flutter_tts (motor del sistema,
+/// costo cero). StatefulWidget propio para detener la locución al salir
+/// del detalle (dispose) y para alternar Escuchar / Detener como un
+/// ESTADO visible, igual que el punto azul del Día 13.
+class _BotonEscuchar extends StatefulWidget {
+  const _BotonEscuchar({required this.reporte});
+
+  final Report reporte;
+
+  @override
+  State<_BotonEscuchar> createState() => _BotonEscucharState();
+}
+
+class _BotonEscucharState extends State<_BotonEscuchar> {
+  final _voz = VozService();
+  bool _leyendo = false;
+
+  @override
+  void dispose() {
+    _voz.silenciar(); // salir de la pantalla = silenciar la voz
+    super.dispose();
+  }
+
+  Future<void> _alternar() async {
+    if (_leyendo) {
+      await _voz.silenciar();
+      if (mounted) setState(() => _leyendo = false);
+      return;
+    }
+    final error = await _voz.escuchar(textoParaLeer(
+      codigo: widget.reporte.id,
+      titulo: widget.reporte.titulo,
+      estado: widget.reporte.estado,
+      zona: widget.reporte.zona,
+      descripcion: widget.reporte.descripcion,
+    ));
+    if (!mounted) return;
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(error),
+      ));
+      return;
+    }
+    setState(() => _leyendo = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _alternar,
+        icon: Icon(_leyendo ? Icons.stop_rounded : Icons.volume_up_outlined),
+        label: Text(_leyendo ? 'Detener lectura' : 'Escuchar el reporte'),
+      ),
+    );
+  }
+}
+
+/// Día 14 (HU-17): "Avisarme cuando cambie el estado" deja de ser un
+/// placeholder. Un tap hace tres cosas EN CONTEXTO: (1) pide el permiso
+/// de notificaciones (Android 13+), (2) guarda el token FCM del
+/// dispositivo ligado al usuario en push_tokens (si Firebase responde)
+/// y (3) muestra el aviso EXACTO que la Edge Function enviaría cuando
+/// el moderador avance el ciclo de estados (la demo del Hito 4 antes
+/// de que exista el panel).
+class _BotonAvisos extends StatefulWidget {
+  const _BotonAvisos({required this.reporte});
+
+  final Report reporte;
+
+  @override
+  State<_BotonAvisos> createState() => _BotonAvisosState();
+}
+
+class _BotonAvisosState extends State<_BotonAvisos> {
+  final _notificaciones = NotificacionesService();
+  bool _activando = false;
+
+  Future<void> _activar() async {
+    setState(() => _activando = true);
+    // (1) Permiso POST_NOTIFICATIONS (Android 13+) — en contexto.
+    final concedido = await _notificaciones.inicializar();
+    if (!mounted) return;
+    if (!concedido) {
+      setState(() => _activando = false);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Sin permiso de notificaciones: actívalo en '
+            'Ajustes > Aplicaciones > CiudadAlerta.'),
+      ));
+      return;
+    }
+    // (2) Token FCM -> push_tokens (null si Firebase no está configurado:
+    //     la fila no viaja y el aviso local cubre la demo).
+    final token = await _notificaciones.registrarToken();
+    // (3) El aviso EXACTO que la Edge Function enviaría con el trigger:
+    //     el siguiente paso del ciclo del estado ACTUAL del reporte.
+    final estadoNuevo =
+        siguienteEstado(widget.reporte.estado) ?? 'En proceso';
+    await _notificaciones.mostrarAvisoEstado(
+      codigo: widget.reporte.id,
+      titulo: widget.reporte.titulo,
+      estadoAnterior: widget.reporte.estado,
+      estadoNuevo: estadoNuevo,
+    );
+    if (!mounted) return;
+    setState(() => _activando = false);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(token == null
+          ? 'Aviso local de demostración enviado. Con Firebase configurado '
+              '(docs/60) el mismo aviso llega como PUSH.'
+          : 'Avisos activados: tu token quedó en push_tokens y la demo '
+              'del aviso fue enviada.'),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _activando ? null : _activar,
+        icon: _activando
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.notifications_outlined),
+        label: const Text('Activar avisos de estado'),
       ),
     );
   }

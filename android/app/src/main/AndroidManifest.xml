@@ -19,6 +19,17 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
+    <!-- Día 14 / HU-16: micrófono para DICTAR la descripción. Se pide
+         EN CONTEXTO (al tocar "Dictar", nunca al abrir la app) y negado
+         NO bloquea: el ciudadano escribe con el teclado. Mismo patrón
+         que la cámara (Día 9) y la ubicación (Día 13). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <!-- Día 14 / HU-17: avisos de cambio de estado. En Android 13+ el
+         permiso runtime POST_NOTIFICATIONS se pide al activar los
+         avisos; en Android < 13 no existe y los avisos salen solos. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:label="CiudadAlerta"
         android:name="${applicationName}"
